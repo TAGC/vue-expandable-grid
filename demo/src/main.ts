@@ -1,8 +1,8 @@
-import Vue from "vue"
-import Foo from "@/Foo.vue";
+import Vue from "vue";
+import InfiniteGrid from "../../src";
 
-Vue.config.productionTip = false
+Vue.config.productionTip = false;
 
 new Vue({
-  render: h => h(Foo)
-}).$mount('#app')
+  render: (h) => h(InfiniteGrid),
+}).$mount("#app");

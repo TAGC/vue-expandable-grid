@@ -1,3 +1,4 @@
-import Foo from "./Foo.vue";
+import InfiniteGrid from "./components/InfiniteGrid.vue";
+export { IGridItem } from "./components/ItemPositioner";
 
-export default Foo;
+export default InfiniteGrid;

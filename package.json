@@ -11,39 +11,31 @@
   },
   "scripts": {
     "dev": "vue-cli-service serve demo/src/main.ts",
-    "build": "vue-cli-service build --target lib src/Foo.vue",
+    "build": "vue-cli-service build --target lib src/index.ts",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "lodash": "^4.17.10",
     "vue": "^2.5.16",
     "vue-class-component": "^6.0.0",
-    "vue-property-decorator": "^6.0.0"
+    "vue-property-decorator": "^6.0.0",
+    "vue-resize": "^0.4.4",
+    "vue-virtual-collection": "^1.2.3"
   },
   "devDependencies": {
+    "@types/lodash": "^4.14.109",
     "@vue/cli-plugin-babel": "^3.0.0-beta.15",
-    "@vue/cli-plugin-eslint": "^3.0.0-beta.15",
     "@vue/cli-plugin-typescript": "^3.0.0-beta.15",
     "@vue/cli-service": "^3.0.0-beta.15",
+    "node-sass": "^4.9.0",
+    "sass-loader": "^7.0.3",
+    "tslint": "^5.10.0",
     "vue-template-compiler": "^2.5.16"
   },
   "babel": {
     "presets": [
       "@vue/app"
     ]
-  },
-  "eslintConfig": {
-    "root": true,
-    "env": {
-      "node": true
-    },
-    "extends": [
-      "plugin:vue/essential",
-      "eslint:recommended"
-    ],
-    "rules": {},
-    "parserOptions": {
-      "parser": "babel-eslint"
-    }
   },
   "postcss": {
     "plugins": {
