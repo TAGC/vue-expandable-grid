@@ -1,6 +1,5 @@
 import ExtentCalculator, { Extent, IPosition } from "@/components/ExtentCalculator";
 import { expect } from "chai";
-import "mocha";
 
 const $ = (o: any) => JSON.stringify(o);
 
@@ -62,7 +61,8 @@ describe("ExtentCalculator", () => {
   });
 
   describe("calculates the minimum grid extent from viewport at:", () => {
-    const testCases: Array<{ position: string, viewport: Extent, grid: Extent }> = [
+    type TestCase = { position: string, viewport: Extent, grid: Extent };
+    const testCases: TestCase[] = [
       {
         position: "origin",
         viewport: { x: 0, y: 0, width: 50, height: 100 },
@@ -101,7 +101,8 @@ describe("ExtentCalculator", () => {
   describe("calculates the minimum grid extent when:", () => {
     const viewport: Extent = { x: 20, y: 50, width: 100, height: 200 };
 
-    const testCases: Array<{ description: string, items: Extent[], grid: Extent }> = [
+    type TestCase = { description: string, items: Extent[], grid: Extent };
+    const testCases: TestCase[] = [
       {
         description: "no items in grid",
         items: [],

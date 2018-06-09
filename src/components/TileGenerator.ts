@@ -10,9 +10,11 @@ export interface ITile {
     isTile: true;
     size: number;
     key: any;
+    column: number;
+    row: number;
+    columnIndex: number;
+    rowIndex: number;
   };
-  column: number;
-  row: number;
 }
 
 /**
@@ -112,9 +114,9 @@ export default class TileGenerator extends GridManager<ITile> {
     return !_.isUndefined(object.data) && object.data.isTile;
   }
 
-  public position(tile: ITile): Extent {
-    const isLastRow = tile.row === this.rows - 1;
-    const isLastColumn = tile.column === this.columns - 1;
+  public position({ data: tile }: ITile): Extent {
+    const isLastRow = tile.rowIndex === this.rows - 1;
+    const isLastColumn = tile.columnIndex === this.columns - 1;
 
     // Tile positioning is done in *logical* (i.e. zoom-independent) grid
     // coordinate space.
@@ -122,8 +124,8 @@ export default class TileGenerator extends GridManager<ITile> {
     return {
       width: isLastColumn ? this.lastColumnWidth : this.tileSize,
       height: isLastRow ? this.lastRowHeight : this.tileSize,
-      x: tile.column * this.tileSize + this.columnOffset,
-      y: tile.row * this.tileSize + this.rowOffset,
+      x: tile.columnIndex * this.tileSize + this.columnOffset,
+      y: tile.rowIndex * this.tileSize + this.rowOffset,
     };
   }
 
@@ -142,19 +144,21 @@ export default class TileGenerator extends GridManager<ITile> {
     // to account for this.
     const physicalTileSize = this.scaleTile(this.tileSize);
 
-    for (const column of _.range(this.columns)) {
-      for (const row of _.range(this.rows)) {
-        const columnKey = firstColumn + column;
-        const rowKey = firstRow + row;
+    for (const columnIndex of _.range(this.columns)) {
+      for (const rowIndex of _.range(this.rows)) {
+        const column = firstColumn + columnIndex;
+        const row = firstRow + rowIndex;
 
         tiles.push({
           data: {
-            key: `${columnKey * this.tileSize},${rowKey * this.tileSize}`,
+            key: `${column * this.tileSize},${row * this.tileSize}`,
             isTile: true,
             size: physicalTileSize,
+            column,
+            row,
+            columnIndex,
+            rowIndex,
           },
-          column,
-          row,
         });
       }
     }
