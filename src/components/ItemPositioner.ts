@@ -13,7 +13,7 @@ export interface IGridItem extends Extent {
  * A type of grid manager responsible for handling the position of items on the grid.
  */
 export default class ItemPositioner extends GridManager<IGridItem> {
-  public _gridExtent: Extent;
+  private _gridExtent: Extent;
 
   constructor() {
     super();
@@ -37,11 +37,10 @@ export default class ItemPositioner extends GridManager<IGridItem> {
 
     // Positioning is done in *logical* (zoom-independent) grid coordinate space.
 
-    return {
-      width: item.width,
-      height: item.height,
-      x: item.x - (grid.x < 0 ? grid.x : 0),
-      y: item.y - (grid.y < 0 ? grid.y : 0),
-    };
+    return new Extent(
+      item.x - (grid.x < 0 ? grid.x : 0),
+      item.y - (grid.y < 0 ? grid.y : 0),
+      item.width,
+      item.height);
   }
 }

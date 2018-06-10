@@ -3,77 +3,94 @@ import * as _ from "lodash";
 /**
  * Represents the position of an entity on a cartesian plane.
  */
-export interface IPosition {
-  x: number;
-  y: number;
+export class Position {
+  constructor(readonly x: number, readonly y: number) {
+
+  }
 }
 
 /**
  * Represents the size of an entity on a cartesian plane.
  */
-export interface ISize {
-  width: number;
-  height: number;
+export class Size {
+  constructor(readonly width: number, readonly height: number) {
+
+  }
 }
 
 /**
  * Represents the extent an entity covers of a cartesian plane.
  */
-export type Extent = IPosition & ISize;
+export class Extent implements Position, Size {
+
+  /**
+   * Derives a new extent based on repositioning a provided extent.
+   *
+   * @param param0 the extent to derive from
+   * @param x the x coordinate of the new extent
+   * @param y the y coordinate of the new extent
+   * @return a new extent
+   */
+  public static reposition({ width, height }: Extent, x: number, y: number): Extent {
+    return new Extent(x, y, width, height);
+  }
+
+  /**
+   * Derives a new extent based on resizing a provided extent.
+   *
+   * @param param0 the extent to derive from
+   * @param width the width of the new extent
+   * @param height the height of the new extent
+   * @return a new extent
+   */
+  public static resize({ x, y }: Extent, width: number, height: number): Extent {
+    return new Extent(x, y, width, height);
+  }
+
+  constructor(
+    readonly x: number,
+    readonly y: number,
+    readonly width: number,
+    readonly height: number) {
+
+  }
+}
 
 /**
  * Represents an entity located at the origin of a cartesian plane.
  */
-export const ORIGIN: IPosition = {
-  x: 0,
-  y: 0,
-};
-
+export const ORIGIN = new Position(0, 0);
 /**
  * Represents an entity with zero width and height.
  */
-export const ZERO_SIZE: ISize = {
-  width: 0,
-  height: 0,
-};
+export const ZERO_SIZE = new Size(0, 0);
 
 /**
  * Represents an entity with no extent.
  */
-export const ZERO_EXTENT: Extent = {
-  x: ORIGIN.x,
-  y: ORIGIN.y,
-  width: ZERO_SIZE.width,
-  height: ZERO_SIZE.height,
-};
+export const ZERO_EXTENT = new Extent(0, 0, 0, 0);
 
 /**
  * A class used for calculating the extent of the grid.
  */
 export default class ExtentCalculator {
   public static scaleExtent(extent: Extent, scaleFactor: number): Extent {
-    return {
-      ...extent,
-      x: extent.x * scaleFactor,
-      y: extent.y * scaleFactor,
-      width: extent.width * scaleFactor,
-      height: extent.height * scaleFactor,
-    };
+    return new Extent(
+      extent.x * scaleFactor,
+      extent.y * scaleFactor,
+      extent.width * scaleFactor,
+      extent.height * scaleFactor);
   }
 
-  public static scalePosition(position: IPosition, scaleFactor: number) {
-    return {
-      ...position,
-      x: position.x * scaleFactor,
-      y: position.y * scaleFactor,
-    };
+  public static scalePosition(position: Position, scaleFactor: number) {
+    return new Position(position.x * scaleFactor, position.y * scaleFactor);
   }
 
   public static descaleExtent(extent: Extent, scaleFactor: number) {
     return ExtentCalculator.scaleExtent(extent, 1 / scaleFactor);
   }
 
-  public static descalePosition(position: IPosition, scaleFactor: number) {
+  public static descalePosition(position: Position, scaleFactor: number) {
     return ExtentCalculator.scalePosition(position, 1 / scaleFactor);
   }
 
@@ -115,12 +132,7 @@ export default class ExtentCalculator {
     const maxX = viewportExtent.width + Math.max(viewportExtent.x, 0);
     const maxY = viewportExtent.height + Math.max(viewportExtent.y, 0);
 
-    return {
-      x: minX,
-      y: minY,
-      width: maxX - minX,
-      height: maxY - minY,
-    };
+    return new Extent(minX, minY, maxX - minX, maxY - minY);
   }
 
   /**
@@ -146,11 +158,6 @@ export default class ExtentCalculator {
       maxY = Math.max(maxY, extent.y + extent.height);
     }
 
-    return {
-      x: minX,
-      y: minY,
-      width: maxX - minX,
-      height: maxY - minY,
-    };
+    return new Extent(minX, minY, maxX - minX, maxY - minY);
   }
 }

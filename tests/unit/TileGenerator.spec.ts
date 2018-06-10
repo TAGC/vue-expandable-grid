@@ -1,9 +1,7 @@
 import { Extent } from "@/components/ExtentCalculator";
 import TileGenerator, { ITile } from "@/components/TileGenerator";
 import { expect } from "chai";
-
-type Description = { description: string };
-const $ = (o) => JSON.stringify(o);
+import { Description } from "../util";
 
 describe("TileGenerator", () => {
   let tiles: ITile[] | null = null;
@@ -24,7 +22,7 @@ describe("TileGenerator", () => {
     const scaleFactor = 5;
     const scaleTiles = (size) => size * scaleFactor;
     const tileGenerator = new TileGenerator(tileSize, scaleTiles, onTilesGenerated);
-    tileGenerator.gridExtent = { x: 0, y: 0, width: tileSize, height: tileSize };
+    tileGenerator.gridExtent = new Extent(0, 0, tileSize, tileSize);
 
     const scaledTileSize = tileSize * scaleFactor;
     tiles!.forEach((tile) => expect(tile.data.size).to.equal(scaledTileSize));
@@ -37,43 +35,43 @@ describe("TileGenerator", () => {
       {
         description: "when grid has zero extent",
         tileSize: 1,
-        gridExtent: { x: 0, y: 0, width: 0, height: 0 },
+        gridExtent: new Extent(0, 0, 0, 0),
         expectedTiles: 2 * 2,
       },
       {
         description: "when grid has arbitrary extent",
         tileSize: 20,
-        gridExtent: { x: -40, y: -60, width: 400, height: 300 },
+        gridExtent: new Extent(-40, -60, 400, 300),
         expectedTiles: 22 * 17,
       },
       {
         description: "when grid begins at origin",
         tileSize: 10,
-        gridExtent: { x: 0, y: 0, width: 100, height: 200 },
+        gridExtent: new Extent(0, 0, 100, 200),
         expectedTiles: 12 * 22,
       },
       {
         description: "when grid begins slighly left of origin",
         tileSize: 10,
-        gridExtent: { x: -5, y: 0, width: 100, height: 200 },
+        gridExtent: new Extent(-5, 0, 100, 200),
         expectedTiles: 11 * 22,
       },
       {
         description: "when grid begins slighly right of origin",
         tileSize: 10,
-        gridExtent: { x: 5, y: 0, width: 100, height: 200 },
+        gridExtent: new Extent(5, 0, 100, 200),
         expectedTiles: 12 * 22,
       },
       {
         description: "when grid begins slighly above origin",
         tileSize: 10,
-        gridExtent: { x: 0, y: -5, width: 100, height: 200 },
+        gridExtent: new Extent(0, -5, 100, 200),
         expectedTiles: 12 * 21,
       },
       {
         description: "when grid begins slighly below origin",
         tileSize: 10,
-        gridExtent: { x: 0, y: 5, width: 100, height: 200 },
+        gridExtent: new Extent(0, 5, 100, 200),
         expectedTiles: 12 * 22,
       },
     ];
@@ -92,17 +90,9 @@ describe("TileGenerator", () => {
   describe("positions tiles in grid", () => {
     type TestCase = { tile: ITile, extent: Extent } & Description;
 
-    const createTile = (columnIndex, rowIndex, size): ITile => ({
-      data: {
-        isTile: true,
-        size,
-        key: null,
-        column: -1,  // Not used in positioning calculations
-        row: -1,     // Not used in positioning calculations
-        columnIndex,
-        rowIndex,
-      },
-    });
+    // Column and row not used in positioning - only their indices.
+    const createTile = (columnIndex, rowIndex, size): ITile =>
+      ({ data: { isTile: true, size, key: null, column: -1, row: -1, columnIndex, rowIndex } });
 
     const test = ({ description, tile, extent }: TestCase, grid: Extent) => {
       it(description, () => {
@@ -115,23 +105,23 @@ describe("TileGenerator", () => {
     };
 
     context("when grid extent aligns with tiles", () => {
-      const grid: Extent = { x: 0, y: 0, width: 100, height: 100 };
+      const grid = new Extent(0, 0, 100, 100);
 
       const testCases: TestCase[] = [
         {
           description: "when tile is at first column and row",
           tile: createTile(0, 0, 10),
-          extent: { x: -10, y: -10, width: 10, height: 10 },
+          extent: new Extent(-10, -10, 10, 10),
         },
         {
           description: "when tile is at last column and row",
           tile: createTile(11, 11, 10),
-          extent: { x: 100, y: 100, width: 0, height: 0 },
+          extent: new Extent(100, 100, 0, 0),
         },
         {
           description: "when tile is at arbitrary column and row",
           tile: createTile(1, 3, 20),
-          extent: { x: 0, y: 40, width: 20, height: 20 },
+          extent: new Extent(0, 40, 20, 20),
         },
       ];
 
@@ -139,23 +129,23 @@ describe("TileGenerator", () => {
     });
 
     context("when grid extent does not align with tiles", () => {
-      const grid: Extent = { x: -10, y: -5, width: 100, height: 100 };
+      const grid = new Extent(-10, -5, 100, 100);
 
       const testCases: TestCase[] = [
         {
           description: "when tile is at first column and row",
           tile: createTile(0, 0, 20),
-          extent: { x: -10, y: -15, width: 20, height: 20 },
+          extent: new Extent(-10, -15, 20, 20),
         },
         {
           description: "when tile is at last column and row",
           tile: createTile(5, 5, 20),
-          extent: { x: 90, y: 85, width: 10, height: 15 },
+          extent: new Extent(90, 85, 10, 15),
         },
         {
           description: "when tile is at arbitrary column and row",
           tile: createTile(2, 1, 20),
-          extent: { x: 30, y: 5, width: 20, height: 20 },
+          extent: new Extent(30, 5, 20, 20),
         },
       ];
 

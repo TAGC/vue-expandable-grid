@@ -118,15 +118,13 @@ export default class TileGenerator extends GridManager<ITile> {
     const isLastRow = tile.rowIndex === this.rows - 1;
     const isLastColumn = tile.columnIndex === this.columns - 1;
 
-    // Tile positioning is done in *logical* (i.e. zoom-independent) grid
-    // coordinate space.
+    // Tile positioning is done in *logical* (i.e. zoom-independent) grid coordinate space.
 
-    return {
-      width: isLastColumn ? this.lastColumnWidth : this.tileSize,
-      height: isLastRow ? this.lastRowHeight : this.tileSize,
-      x: tile.columnIndex * this.tileSize + this.columnOffset,
-      y: tile.rowIndex * this.tileSize + this.rowOffset,
-    };
+    return new Extent(
+      tile.columnIndex * this.tileSize + this.columnOffset,
+      tile.rowIndex * this.tileSize + this.rowOffset,
+      isLastColumn ? this.lastColumnWidth : this.tileSize,
+      isLastRow ? this.lastRowHeight : this.tileSize);
   }
 
   public notifyZoomLevelChange() {

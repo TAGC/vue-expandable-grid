@@ -28,9 +28,9 @@ import VueResize from "vue-resize";
 import VirtualCollection from "vue-virtual-collection";
 import ExtentCalculator, {
   Extent,
-  IPosition,
-  ISize,
   ORIGIN,
+  Position,
+  Size,
   ZERO_EXTENT,
   ZERO_SIZE,
 } from "./ExtentCalculator";
@@ -71,12 +71,12 @@ export default class InfiniteGrid extends Vue {
   /**
    * The dimensions of the virtual-collection Vue component in *physical* grid coordinate space.
    */
-  private collectionSize: ISize = ZERO_SIZE;
+  private collectionSize = ZERO_SIZE;
 
   /**
    * The extent of the viewport in physical grid coordinate space.
    */
-  private physicalViewportExtent: Extent = ZERO_EXTENT;
+  private physicalViewportExtent = ZERO_EXTENT;
 
   /**
    * The collection of grid tiles to render.
@@ -105,7 +105,7 @@ export default class InfiniteGrid extends Vue {
    *
    * This position is in logical grid coordinate space.
    */
-  private zoomFocus: IPosition = ORIGIN;
+  private zoomFocus = ORIGIN;
 
   /**
    * The collection of additional objects to place on the grid on top of the tiles.
@@ -262,8 +262,10 @@ export default class InfiniteGrid extends Vue {
     const collection = this.collection as any;
     const scrollbarWidth = collection.offsetWidth - collection.clientWidth;
     const scrollbarHeight = collection.offsetHeight - collection.clientHeight;
-    this.physicalViewportExtent.width = this.collectionSize.width - scrollbarWidth;
-    this.physicalViewportExtent.height = this.collectionSize.height - scrollbarHeight;
+    this.physicalViewportExtent = Extent.resize(
+      this.physicalViewportExtent,
+      this.collectionSize.width - scrollbarWidth,
+      this.collectionSize.height - scrollbarHeight);
   }
 
   @Watch("gridExtent")
@@ -315,8 +317,10 @@ export default class InfiniteGrid extends Vue {
    * position should expect and return coordinates in physical grid coordinate space as well.
    */
   private updateViewportPosition(updateX: (x: number) => number, updateY: (y: number) => number) {
-    this.physicalViewportExtent.x = updateX(this.physicalViewportExtent.x);
-    this.physicalViewportExtent.y = updateY(this.physicalViewportExtent.y);
+    this.physicalViewportExtent = Extent.reposition(
+      this.physicalViewportExtent,
+      updateX(this.physicalViewportExtent.x),
+      updateY(this.physicalViewportExtent.y));
 
     const physicalGridExtent = ExtentCalculator.scaleExtent(this.gridExtent, this.zoomLevel);
     const scrollLeft = this.physicalViewportExtent.x - physicalGridExtent.x;
@@ -334,7 +338,7 @@ export default class InfiniteGrid extends Vue {
    * Positions on the grid scrollbars are excluded. The position is expected in
    * logical grid coordinate space.
    */
-  private isPositionInGrid(position: IPosition): boolean {
+  private isPositionInGrid(position: Position): boolean {
     const { x, y, width, height } = this.logicalViewportExtent;
 
     return position.x - x <= width && position.y - y <= height;
@@ -344,7 +348,7 @@ export default class InfiniteGrid extends Vue {
    * Converts a position in screen coordinates (such as from a mouse event) into logical grid
    * coordinate space with the origin at the top-left corner of the grid tile at row 0 and column 0.
    */
-  private toGridPosition(position: IPosition): IPosition {
+  private toGridPosition(position: Position): Position {
     const boundingRect = this.$el.getBoundingClientRect() as DOMRect;
     const viewport = this.logicalViewportExtent;
 
