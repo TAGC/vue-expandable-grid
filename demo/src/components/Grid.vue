@@ -1,8 +1,10 @@
 <template>
-  <ExpandableGrid v-show="showGrid" :tileSize="100" :minExtent="minExtent">
-    <Cell slot="grid-tile" slot-scope="{data}" :props="data" :alive="isAlive({data})"/>
-    <!-- <DebugTile slot="grid-tile" slot-scope="{data}" :props="data" :debug="`${data.column}.${data.row}`" /> -->
-  </ExpandableGrid>
+  <div @click="regenerateCells">
+    <ExpandableGrid v-show="showGrid" :tileSize="100" :minExtent="minExtent">
+      <Cell slot="grid-tile" slot-scope="{data}" :props="data" :alive="isAlive({data})"/>
+      <!-- <DebugTile slot="grid-tile" slot-scope="{data}" :props="data" :debug="`${data.column}.${data.row}`" /> -->
+    </ExpandableGrid>
+  </div>
 </template>
 
 <script lang="ts">
@@ -31,9 +33,7 @@ export default class Grid extends Vue {
   }
 
   private get conwayGridDimensions(): GridDimensions {
-    const numberOfRows = this.maxRow - this.minRow;
-    const numberOfColumns = this.maxColumn - this.minColumn;
-    return new GridDimensions(this.minRow, this.minColumn, numberOfRows, numberOfColumns);
+    return new GridDimensions(0, 0, 20, 20);
   }
 
   private get minExtent(): Extent {
@@ -58,7 +58,9 @@ export default class Grid extends Vue {
   }
 
   private regenerateCells() {
+    console.time("Next generation");
     this.conwayGrid.nextGeneration();
+    console.timeEnd("Next generation");
     this.refreshGrid();
   }
 
