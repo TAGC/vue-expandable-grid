@@ -1,6 +1,14 @@
 {
-  "name": "vue-infinite-grid",
+  "name": "vue-expandable-grid",
   "version": "0.1.0",
+  "license": "MIT",
+  "author": "TAGC",
+  "main": "dist/vue-expandable-grid.common.js",
+  "description": "Vue component representing an infinitely-expandable grid",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TAGC/vue-expandable-grid"
+  },
   "scripts": {
     "build": "vue-cli-service build --target lib src/index.ts",
     "lint": "vue-cli-service lint",
@@ -45,13 +53,5 @@
     "> 1%",
     "last 2 versions",
     "not ie <= 8"
-  ],
-  "license": "MIT",
-  "author": "TAGC",
-  "main": "dist/vue-infinite-grid.common.js",
-  "description": "Vue component representing an infinitely-expandable grid",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/TAGC/vue-infinite-grid"
-  }
+  ]
 }

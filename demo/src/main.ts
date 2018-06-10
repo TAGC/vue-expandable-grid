@@ -1,8 +1,8 @@
 import Vue from "vue";
-import InfiniteGrid from "../../src";
+import ExpandableGrid from "../../src";
 
 Vue.config.productionTip = false;
 
 new Vue({
-  render: (h) => h(InfiniteGrid),
+  render: (h) => h(ExpandableGrid),
 }).$mount("#app");

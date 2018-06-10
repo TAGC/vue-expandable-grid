@@ -50,7 +50,7 @@ Vue.use(VirtualCollection);
  * A Vue component representing a grid that can be expanded indefinitely in all directions.
  */
 @Component({ components: { DebugTile } })
-export default class InfiniteGrid extends Vue {
+export default class ExpandableGrid extends Vue {
   /**
    * The default length and width of grid tiles in logical grid coordinate space.
    */
@@ -116,7 +116,7 @@ export default class InfiniteGrid extends Vue {
   /**
    * The length and width of grid tiles in logical grid coordinate space.
    */
-  @Prop({ default: InfiniteGrid.defaultTileSize })
+  @Prop({ default: ExpandableGrid.defaultTileSize })
   private tileSize: number;
 
   /**
@@ -226,7 +226,7 @@ export default class InfiniteGrid extends Vue {
   }
 
   private onGridClicked(e: MouseEvent) {
-    if (Date.now() - this.lastMouseDown > InfiniteGrid.clickTimeout) {
+    if (Date.now() - this.lastMouseDown > ExpandableGrid.clickTimeout) {
       return;
     }
 
