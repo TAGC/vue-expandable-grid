@@ -74,6 +74,13 @@ export const ZERO_EXTENT = new Extent(0, 0, 0, 0);
  * A class used for calculating the extent of the grid.
  */
 export default class ExtentCalculator {
+  /**
+   * Scales an extent based on a provided scale factor.
+   *
+   * @param extent the extent to scale
+   * @param scaleFactor the factor to scale the properties of the extent by
+   * @return the scaled extent
+   */
   public static scaleExtent(extent: Extent, scaleFactor: number): Extent {
     return new Extent(
       extent.x * scaleFactor,
@@ -82,14 +89,39 @@ export default class ExtentCalculator {
       extent.height * scaleFactor);
   }
 
+  /**
+   * Scales a position based on a provided scale factor.
+   *
+   * @param position the position to scale
+   * @param scaleFactor the factor to scale the coordinates of the position by
+   * @return the scaled position
+   */
   public static scalePosition(position: Position, scaleFactor: number) {
     return new Position(position.x * scaleFactor, position.y * scaleFactor);
   }
 
+  /**
+   * Descales an extent based on a provided scale factor.
+   *
+   * This is equivalent to scaling the extent by the inverse of the provided scale factor.
+   *
+   * @param extent the extent to descale
+   * @param scaleFactor the factor to descale the properties of the extent by
+   * @return the descaled extent
+   */
   public static descaleExtent(extent: Extent, scaleFactor: number) {
     return ExtentCalculator.scaleExtent(extent, 1 / scaleFactor);
   }
 
+  /**
+   * Descales a position based on a provided scale factor.
+   *
+   * This is equivalent to descaling the position by the inverse of the provided scale factor.
+   *
+   * @param position the position to descale
+   * @param scaleFactor the factor to descale the coordinates of the position by
+   * @return the descaled position
+   */
   public static descalePosition(position: Position, scaleFactor: number) {
     return ExtentCalculator.scalePosition(position, 1 / scaleFactor);
   }
@@ -159,5 +191,9 @@ export default class ExtentCalculator {
     }
 
     return new Extent(minX, minY, maxX - minX, maxY - minY);
+  }
+
+  private constructor() {
+
   }
 }

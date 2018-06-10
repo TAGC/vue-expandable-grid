@@ -1,7 +1,13 @@
 import * as _ from "lodash";
 
+/**
+ * Represents a callback that is invoked to handle a change in the zoom level.
+ */
 export type ZoomEventHandler = (zoomLevel: number) => void;
 
+/**
+ * A class used for controlling the level of zoom applied to the grid.
+ */
 export default class ZoomManager {
   private readonly zoomLevels: number[];
   private readonly defaultZoomLevelIndex: number;
@@ -17,10 +23,18 @@ export default class ZoomManager {
     this.resetZoom();
   }
 
+  /**
+   * Gets the current grid zoom level.
+   */
   public get zoomLevel() {
     return this.zoomLevels[this.zoomLevelIndex];
   }
 
+  /**
+   * Increases the grid zoom by one level if possible.
+   *
+   * If the grid is already at maximum zoom, this method has no effect.
+   */
   public tryIncreaseZoom() {
     if (this.zoomLevelIndex === this.zoomLevels.length - 1) {
       return;
@@ -30,6 +44,11 @@ export default class ZoomManager {
     this.publishZoomLevel();
   }
 
+  /**
+   * Decreases the grid zoom by one level if possible.
+   *
+   * If the grid is already at minimum zoom, this method has no effect.
+   */
   public tryDecreaseZoom() {
     if (this.zoomLevelIndex === 0) {
       return;
@@ -39,6 +58,9 @@ export default class ZoomManager {
     this.publishZoomLevel();
   }
 
+  /**
+   * Resets the grid zoom to the default level (1).
+   */
   public resetZoom() {
     this.zoomLevelIndex = this.defaultZoomLevelIndex;
     this.publishZoomLevel();

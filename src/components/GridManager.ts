@@ -6,8 +6,14 @@ import { Extent } from "./ExtentCalculator";
  * @param T the type of objects managed by this class.
  */
 export default abstract class GridManager<T> {
+  /**
+   * Sets the grid extent.
+   */
   abstract set gridExtent(newExtent: Extent);
 
+  /**
+   * Gets the grid extent.
+   */
   abstract get gridExtent(): Extent;
 
   /**
