@@ -1,4 +1,4 @@
-import ExtentCalculator, { Extent, Position } from "@/components/ExtentCalculator";
+import ExtentCalculator, { Extent, Position, ZERO_EXTENT } from "@/components/ExtentCalculator";
 import { expect } from "chai";
 
 describe("ExtentCalculator", () => {
@@ -42,6 +42,22 @@ describe("ExtentCalculator", () => {
     expect(descaledExtent.height).to.equal(12);
   });
 
+  it("ensures the grid extent is at least the forced minimum extent", () => {
+    const forcedMinimumExtent = new Extent(-50, -100, 200, 500);
+
+    const actualGridExtent = ExtentCalculator.calculateGridExtent(
+      ZERO_EXTENT,
+      forcedMinimumExtent,
+      []);
+
+    expect(actualGridExtent.x).is.at.most(forcedMinimumExtent.x);
+    expect(actualGridExtent.y).is.at.most(forcedMinimumExtent.y);
+    expect(actualGridExtent.x + actualGridExtent.width)
+      .is.at.least(forcedMinimumExtent.x + forcedMinimumExtent.width);
+    expect(actualGridExtent.y + actualGridExtent.height)
+      .is.at.least(forcedMinimumExtent.y + forcedMinimumExtent.height);
+  });
+
   describe("calculates the minimum grid extent from viewport at:", () => {
     type TestCase = { position: string, viewport: Extent, grid: Extent };
     const testCases: TestCase[] = [
@@ -74,7 +90,7 @@ describe("ExtentCalculator", () => {
 
     testCases.forEach(({ position, viewport, grid }) => {
       it(position, () => {
-        const actualGridExtent = ExtentCalculator.calculateGridExtent(viewport, []);
+        const actualGridExtent = ExtentCalculator.calculateGridExtent(viewport, ZERO_EXTENT, []);
         expect(actualGridExtent).to.deep.equal(grid);
       });
     });
@@ -117,7 +133,7 @@ describe("ExtentCalculator", () => {
 
     testCases.forEach(({ description, items, grid }) => {
       it(description, () => {
-        const actualGridExtent = ExtentCalculator.calculateGridExtent(viewport, items);
+        const actualGridExtent = ExtentCalculator.calculateGridExtent(viewport, ZERO_EXTENT, items);
         expect(actualGridExtent).to.deep.equal(grid);
       });
     });

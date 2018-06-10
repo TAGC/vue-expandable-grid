@@ -11,7 +11,7 @@
   },
   "scripts": {
     "build": "vue-cli-service build --target lib src/index.ts",
-    "build:demo": "vue-cli-service build --target app --name 'vue-infinite-grid' demo/src/main.ts",
+    "build:demo": "vue-cli-service build --target app --name 'vue-expandable-grid' demo/src/main.ts",
     "lint": "vue-cli-service lint",
     "dev": "vue-cli-service serve demo/src/main.ts",
     "test": "vue-cli-service test:unit"

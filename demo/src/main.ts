@@ -1,8 +1,8 @@
 import Vue from "vue";
-import ExpandableGrid from "../../src";
+import App from "./App.vue";
 
 Vue.config.productionTip = false;
 
 new Vue({
-  render: (h) => h(ExpandableGrid),
+  render: (h) => h(App),
 }).$mount("#app");

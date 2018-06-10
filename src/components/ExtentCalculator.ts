@@ -133,12 +133,20 @@ export default class ExtentCalculator {
    * All values are expected and returned in logical (zoom-independent) grid coordinate space.
    *
    * @param viewportExtent the extent of the grid viewport
+   * @param forcedMinimumExtent the forced minimum extent of the grid
    * @param itemExtents the individual extents of all the items located on the grid
    * @return the necessary extent of the grid
    */
-  public static calculateGridExtent(viewportExtent: Extent, itemExtents: Extent[]): Extent {
-    const minimumExtent = ExtentCalculator.deriveMinimumGridExtent(viewportExtent);
-    const gridExtent = ExtentCalculator.reduceExtents([minimumExtent, ...itemExtents]);
+  public static calculateGridExtent(
+    viewportExtent: Extent,
+    forcedMinimumExtent: Extent,
+    itemExtents: Extent[]): Extent {
+    const minimumExtentFromViewport = ExtentCalculator.deriveMinimumGridExtent(viewportExtent);
+    const gridExtent = ExtentCalculator.reduceExtents([
+      minimumExtentFromViewport,
+      forcedMinimumExtent,
+      ...itemExtents,
+    ]);
 
     return gridExtent;
   }

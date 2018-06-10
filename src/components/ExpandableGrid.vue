@@ -125,6 +125,12 @@ export default class ExpandableGrid extends Vue {
   @Prop({ default: () => new Set(_.range(8, 21).map((x) => x / 10)) })
   private zoomLevels: Set<number> | number[];
 
+  /**
+   * The forced minimum extent of the grid.
+   */
+  @Prop({default: () => ZERO_EXTENT})
+  private minExtent: Extent;
+
   public mounted() {
     // Captures the dimensions of the root element before the VirtualCollection is mounted to
     // avoid including the scrollbar dimensions.
@@ -140,7 +146,12 @@ export default class ExpandableGrid extends Vue {
     this.scrollManager = new ScrollManager(this.collection, this.onGridScrolled);
     this.zoomManager = new ZoomManager(new Set([...this.zoomLevels]), this.onZoomLevelChanged);
 
-    Vue.nextTick(this.onResize);
+    Vue.nextTick(() => {
+      this.onResize();
+      this.updateViewportPosition((x) => x, (y) => y);
+      this.itemPositioner.gridExtent = this.gridExtent;
+      this.tileGenerator.gridExtent = this.gridExtent;
+    });
   }
 
   /**
@@ -166,7 +177,10 @@ export default class ExpandableGrid extends Vue {
    * Gets the extent of the grid in logical grid coordinate space.
    */
   private get gridExtent(): Extent {
-    return ExtentCalculator.calculateGridExtent(this.logicalViewportExtent, this.items);
+    return ExtentCalculator.calculateGridExtent(
+      this.logicalViewportExtent,
+      this.minExtent,
+      this.items);
   }
 
   private cellSizeAndPositionGetter(object: IGridItem | ITile): Extent {
