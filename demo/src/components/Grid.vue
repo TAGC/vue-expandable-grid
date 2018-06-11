@@ -29,7 +29,7 @@ export default class Grid extends Vue {
   public mounted() {
     this.conwayGrid = new ConwayGrid(this.conwayGridDimensions);
     this.onConwayGridDimensionsChanged(this.conwayGridDimensions);
-    setInterval(() => this.regenerateCells(), Grid.cellRegenerationRate);
+    // setInterval(() => this.regenerateCells(), Grid.cellRegenerationRate);
   }
 
   private get conwayGridDimensions(): GridDimensions {
@@ -78,3 +78,4 @@ export default class Grid extends Vue {
   }
 }
 </script>
+
