@@ -63,12 +63,12 @@ export default class ConwayGrid {
     const lastRowDiff = newDimensions.lastRow - this.lastRow;
     const lastColumnDiff = newDimensions.lastColumn - this.lastColumn;
 
-    const createRow = () => Array.from({ length: this.numberOfColumns }, () => false);
+    const createRow = () => Array.from({ length: this.numberOfColumns }, () => this.trySpawnCell());
 
     const expandUpwards = () => this.grid.unshift(createRow());
     const expandDownwards = () => this.grid.push(createRow());
-    const expandLeftwards = () => this.grid.forEach((row) => row.unshift(false));
-    const expandRightwards = () => this.grid.forEach((row) => row.push(false));
+    const expandLeftwards = () => this.grid.forEach((row) => row.unshift(this.trySpawnCell()));
+    const expandRightwards = () => this.grid.forEach((row) => row.push(this.trySpawnCell()));
 
     const contractFromTop = () => this.grid.shift();
     const contractFromBottom = () => this.grid.pop();
@@ -146,6 +146,18 @@ export default class ConwayGrid {
     }
   }
 
+  public spawnRandomCells() {
+    for (let row = 0; row < this.numberOfRows; row++) {
+      for (let column = 0; column < this.numberOfColumns; column++) {
+        this.grid[row][column] = this.trySpawnCell();
+      }
+    }
+  }
+
+  private trySpawnCell() {
+    return Math.random() < this.habitability;
+  }
+
   private positionHashOfCell(cell: Cell): number {
     return cell.row * this.numberOfRows + cell.column;
   }
@@ -163,16 +175,6 @@ export default class ConwayGrid {
 
   private reviveCell({ row, column }: Cell) {
     this.grid[row][column] = true;
-  }
-
-  private spawnRandomCells() {
-    const trySpawn = () => Math.random() < this.habitability;
-
-    for (let row = 0; row < this.numberOfRows; row++) {
-      for (let column = 0; column < this.numberOfColumns; column++) {
-        this.grid[row][column] = trySpawn();
-      }
-    }
   }
 
   private *getLiveCells(): IterableIterator<Cell> {

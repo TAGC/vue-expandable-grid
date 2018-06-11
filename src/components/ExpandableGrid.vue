@@ -34,11 +34,11 @@ import ExtentCalculator, {
   ZERO_EXTENT,
   ZERO_SIZE,
 } from "./ExtentCalculator";
-import { IGridClickEventArgs, IGridMouseMoveEventArgs } from "./GridEvents";
+import { IGridClickEventArgs, IGridMouseMoveEventArgs, IGridResizeEventArgs } from "./GridEvents";
 import GridManager from "./GridManager";
 import ItemPositioner, { IGridItem } from "./ItemPositioner";
 import ScrollManager, { IScrollEvent, ScrollSource } from "./ScrollManager";
-import TileGenerator, { ITile } from "./TileGenerator";
+import TileGenerator, { ITile, ITileStatistics } from "./TileGenerator";
 import { DebugTile } from "./tiles";
 import ZoomManager from "./ZoomManager";
 
@@ -199,8 +199,16 @@ export default class ExpandableGrid extends Vue {
     return ExtentCalculator.scaleExtent(logicalExtent, this.zoomLevel);
   }
 
-  private onTilesRegenerated(tiles: ITile[]) {
+  private onTilesRegenerated(tiles: ITile[], statistics: ITileStatistics) {
     this.tiles = tiles;
+
+    const data: IGridResizeEventArgs = {
+      ...statistics,
+      numberOfRows: statistics.lastRow - statistics.firstRow,
+      numberOfColumns: statistics.lastColumn - statistics.firstColumn,
+    };
+
+    this.$emit("grid-resized", data);
   }
 
   private onZoomLevelChanged(zoomLevel: number) {

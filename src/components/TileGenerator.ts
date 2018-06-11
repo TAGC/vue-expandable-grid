@@ -17,10 +17,17 @@ export interface ITile {
   };
 }
 
+export interface ITileStatistics {
+  firstRow: number;
+  firstColumn: number;
+  lastRow: number;
+  lastColumn: number;
+}
+
 /**
  * Represents a callback to invoke when the grid tiles are regenerated.
  */
-export type TileRegeneratedHandler = (newTiles: ITile[]) => void;
+export type TileRegeneratedHandler = (newTiles: ITile[], statistics: ITileStatistics) => void;
 
 /**
  * A type of grid manager that handles the generation and positioning of grid tiles.
@@ -161,6 +168,13 @@ export default class TileGenerator extends GridManager<ITile> {
       }
     }
 
-    this.onTilesRegenerated(tiles);
+    const statistics: ITileStatistics = {
+      firstRow,
+      firstColumn,
+      lastRow: firstRow + this.rows,
+      lastColumn: firstColumn + this.columns,
+    };
+
+    this.onTilesRegenerated(tiles, statistics);
   }
 }
