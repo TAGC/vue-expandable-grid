@@ -25,7 +25,7 @@ export default class ConwayGrid {
   constructor(initialDimensions: GridDimensions) {
     this.firstRow = 0;
     this.firstColumn = 0;
-    this.grid = [[]];
+    this.grid = [];
 
     this.resize(initialDimensions);
     this.spawnRandomCells();
@@ -82,9 +82,9 @@ export default class ConwayGrid {
     };
 
     if (firstRowDiff > 0) {
-      repeat(expandUpwards, firstRowDiff);
+      repeat(contractFromTop, firstRowDiff);
     } else {
-      repeat(contractFromTop, -firstRowDiff);
+      repeat(expandUpwards, -firstRowDiff);
     }
 
     if (lastRowDiff > 0) {
@@ -94,9 +94,9 @@ export default class ConwayGrid {
     }
 
     if (firstColumnDiff > 0) {
-      repeat(expandLeftwards, firstColumnDiff);
+      repeat(contractFromLeft, firstColumnDiff);
     } else {
-      repeat(contractFromLeft, -firstColumnDiff);
+      repeat(expandLeftwards, -firstColumnDiff);
     }
 
     if (lastColumnDiff > 0) {
