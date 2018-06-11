@@ -217,7 +217,8 @@ export default class ExpandableGrid extends Vue {
       return;
     }
 
-    const scrollSpeedModifier = e.shiftKey ? 0.5 : 0.2;
+    // Potentially make this customisable.
+    const scrollSpeedModifier = 1;
 
     // Note that horizontal scrolling does not work very well in Electron.
     // See: https://github.com/electron/electron/issues/12997
