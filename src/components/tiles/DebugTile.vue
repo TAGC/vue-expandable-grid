@@ -21,10 +21,11 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-$border: 1px solid rgb(166, 205, 226);
+$border: 1px solid black;
 
 .tile-debug {
   border-left: $border;
   border-top: $border;
+  font-size: 12px;
 }
 </style>
