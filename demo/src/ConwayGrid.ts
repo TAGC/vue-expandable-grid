@@ -50,7 +50,18 @@ export default class ConwayGrid {
     return this.firstColumn + this.numberOfColumns;
   }
 
-  public liveCellAt(row: number, column: number): boolean {
+  public toggleCellAtPosition(row: number, column: number) {
+    const { row: iRow, column: iColumn } = this.fromLogicalRowAndColumn(row, column);
+
+    if (iRow < 0 || iRow >= this.numberOfRows || iColumn < 0 || iColumn >= this.numberOfColumns) {
+      return;
+    }
+
+    this.grid[iRow][iColumn] = !this.grid[iRow][iColumn];
+    // this.publishCells([...this.getLiveCells()]);
+  }
+
+  public isCellAlive(row: number, column: number): boolean {
     const { row: iRow, column: iColumn } = this.fromLogicalRowAndColumn(row, column);
 
     if (iRow < 0 || iRow >= this.numberOfRows || iColumn < 0 || iColumn >= this.numberOfColumns) {
@@ -113,9 +124,9 @@ export default class ConwayGrid {
   }
 
   public nextGeneration() {
-    const dyingCells: ICell[] = [];
-    const revivingCells: ICell[] = [];
-    const nextGeneration: ICell[] = [];
+    const dyingCells: ICellPosition[] = [];
+    const revivingCells: ICellPosition[] = [];
+    const nextGeneration: ICellPosition[] = [];
     const visitedDeadCells = new Set<number>();
 
     for (const cell of this.getLiveCells()) {
@@ -155,7 +166,7 @@ export default class ConwayGrid {
     this.publishCells(nextGeneration);
   }
 
-  private publishCells(cells: ICell[]) {
+  private publishCells(cells: ICellPosition[]) {
     const transform = (cell) => this.toLogicalRowAndColumn(cell.row, cell.column);
 
     this.onCellsGenerated(cells.map(transform));
@@ -165,7 +176,7 @@ export default class ConwayGrid {
     return Math.random() < this.habitability;
   }
 
-  private positionHashOfCell(cell: ICell): number {
+  private positionHashOfCell(cell: ICellPosition): number {
     return cell.row * this.numberOfRows + cell.column;
   }
 
@@ -183,11 +194,11 @@ export default class ConwayGrid {
     };
   }
 
-  private killCell({ row, column }: ICell) {
+  private killCell({ row, column }: ICellPosition) {
     this.grid[row][column] = false;
   }
 
-  private reviveCell({ row, column }: ICell) {
+  private reviveCell({ row, column }: ICellPosition) {
     this.grid[row][column] = true;
   }
 
@@ -201,7 +212,7 @@ export default class ConwayGrid {
     }
   }
 
-  private *getNeighbours({ row, column }: ICell): IterableIterator<ICell> {
+  private *getNeighbours({ row, column }: ICellPosition): IterableIterator<ICell> {
     for (let i = row - 1; i <= row + 1; i++) {
       for (let j = column - 1; j <= column + 1; j++) {
         if (i === row && j === column) {
