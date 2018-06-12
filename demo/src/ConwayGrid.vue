@@ -1,5 +1,5 @@
 <template>
-  <div :style="styleObject">
+  <div class="conway-grid-overlay" :style="styleObject">
     <ExpandableGrid
       :items="cells"
       :tileSize="cellSize"
@@ -37,7 +37,7 @@ export default class ConwayGrid extends Vue {
   private conwayGrid: ConwayCalculator | null = null;
   private previousGeneration: ICellPosition[] = [];
   private currentGeneration: ICellPosition[] = [];
-  private regenerationRunning = true;
+  private regenerationTimer: any = null;
 
   @Prop({ default: 100 })
   private cellSize: number;
@@ -54,13 +54,17 @@ export default class ConwayGrid extends Vue {
   public mounted() {
     this.conwayGrid = new ConwayCalculator(this.habitability, this.onCellsGenerated);
     window.addEventListener("keyup", this.onKeyPressed);
-    setInterval(() => this.regenerateCells(), this.cellRegenerationRate);
+    this.toggleRegeneration();
   }
 
   private get styleObject() {
     return {
       opacity: this.regenerationRunning ? 1 : 0.5,
     };
+  }
+
+  private get regenerationRunning() {
+    return this.regenerationTimer !== null;
   }
 
   private get bornCells(): IGridItem[] {
@@ -102,25 +106,37 @@ export default class ConwayGrid extends Vue {
   }
 
   private regenerateCells() {
-    if (!this.regenerationRunning) {
-      return;
-    }
-
     console.time("Next generation");
     this.conwayGrid!.nextGeneration();
     console.timeEnd("Next generation");
   }
 
+  private toggleRegeneration() {
+    if (this.regenerationRunning) {
+      window.clearInterval(this.regenerationTimer!);
+      this.regenerationTimer = null;
+    } else {
+      this.regenerationTimer = setInterval(this.regenerateCells, this.cellRegenerationRate);
+    }
+  }
+
+  @Watch("cellRegenerationRate")
+  private onCellRegenerationRateChanged() {
+    this.toggleRegeneration();
+    this.toggleRegeneration();
+  }
+
   private onGridResized(e: IGridResizeEventArgs) {
-    console.log("Grid resized", e);
-    this.conwayGrid!.resize(e);
+    if (this.conwayGrid !== null) {
+      this.conwayGrid!.resize(e);
+    }
   }
 
   private onKeyPressed(e: KeyboardEvent) {
     const space = 32;
 
     if (e.keyCode === space) {
-      this.regenerationRunning = !this.regenerationRunning;
+      this.toggleRegeneration();
     }
   }
 
@@ -144,3 +160,9 @@ export default class ConwayGrid extends Vue {
   }
 }
 </script>
+
+<style lang="scss" scoped>
+.conway-grid-overlay {
+  position: relative;
+}
+</style>
