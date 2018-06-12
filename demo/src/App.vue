@@ -1,16 +1,22 @@
 <template>
   <div id="app">
-    <Grid />
+    <ConwayGrid :minExtent="minGridExtent" />
   </div>
 </template>
 
 <script lang="ts">
+import { Extent } from "@/.";
 import Vue from "vue";
 import { Component } from "vue-property-decorator";
-import Grid from "./components/Grid.vue";
+import ConwayGrid from "./ConwayGrid.vue";
 
-@Component({ components: { Grid } })
-export default class App extends Vue {}
+@Component({ components: { ConwayGrid } })
+export default class App extends Vue {
+
+  private get minGridExtent(): Extent {
+    return new Extent(-200, -200, 400, 400);
+  }
+}
 </script>
 
 <style lang="scss" scoped>

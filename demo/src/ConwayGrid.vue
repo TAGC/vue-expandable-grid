@@ -26,34 +26,41 @@ import ExpandableGrid, {
   ITile,
   SolidTile,
 } from "@/.";
+import { ZERO_EXTENT } from "@/components/ExtentCalculator";
 import Vue from "vue";
-import { Component, Watch } from "vue-property-decorator";
-import ConwayGrid, { GridDimensions, ICell, ICellPosition } from "../ConwayGrid";
+import { Component, Prop, Watch } from "vue-property-decorator";
 import Cell, { State as CellState } from "./Cell.vue";
+import ConwayCalculator, { GridDimensions, ICell, ICellPosition } from "./ConwayCalculator";
 
 @Component({ components: { ExpandableGrid, Cell, DebugTile, SolidTile } })
-export default class Grid extends Vue {
-  private static readonly cellRegenerationRate = 500;
-  private static readonly habitability = 0.25;
-
-  private conwayGrid = new ConwayGrid(Grid.habitability, this.onCellsGenerated);
+export default class ConwayGrid extends Vue {
+  private conwayGrid: ConwayCalculator | null = null;
   private previousGeneration: ICellPosition[] = [];
   private currentGeneration: ICellPosition[] = [];
   private regenerationRunning = true;
 
+  @Prop({ default: 100 })
+  private cellSize: number;
+
+  @Prop({ default: 1000 })
+  private cellRegenerationRate: number;
+
+  @Prop({ default: () => ZERO_EXTENT })
+  private minExtent: Extent;
+
+  @Prop({ default: 0.25 })
+  private habitability: number;
+
   public mounted() {
+    this.conwayGrid = new ConwayCalculator(this.habitability, this.onCellsGenerated);
     window.addEventListener("keyup", this.onKeyPressed);
-    setInterval(() => this.regenerateCells(), Grid.cellRegenerationRate);
+    setInterval(() => this.regenerateCells(), this.cellRegenerationRate);
   }
 
   private get styleObject() {
     return {
       opacity: this.regenerationRunning ? 1 : 0.5,
     };
-  }
-
-  private get minExtent(): Extent {
-    return new Extent(-200, -200, 400, 400);
   }
 
   private get bornCells(): IGridItem[] {
@@ -78,12 +85,8 @@ export default class Grid extends Vue {
     return [...this.bornCells, ...this.stableCells, ...this.dyingCells];
   }
 
-  private get cellSize(): number {
-    return 100;
-  }
-
   private get cellFadeRate(): number {
-    return 0.001 * 0.5 * Grid.cellRegenerationRate;
+    return 0.001 * 0.5 * this.cellRegenerationRate;
   }
 
   private displayCell(cellPosition: ICellPosition, state: CellState): IGridItem {
@@ -104,13 +107,13 @@ export default class Grid extends Vue {
     }
 
     console.time("Next generation");
-    this.conwayGrid.nextGeneration();
+    this.conwayGrid!.nextGeneration();
     console.timeEnd("Next generation");
   }
 
   private onGridResized(e: IGridResizeEventArgs) {
     console.log("Grid resized", e);
-    this.conwayGrid.resize(e);
+    this.conwayGrid!.resize(e);
   }
 
   private onKeyPressed(e: KeyboardEvent) {
@@ -122,10 +125,10 @@ export default class Grid extends Vue {
   }
 
   private onGridClicked({ row, column }: IGridClickEventArgs) {
-    this.conwayGrid.toggleCellAtPosition(row, column);
+    this.conwayGrid!.toggleCellAtPosition(row, column);
 
     // Skips the transitional states (born, dying) after adding/removing the cell.
-    if (this.conwayGrid.isCellAlive(row, column)) {
+    if (this.conwayGrid!.isCellAlive(row, column)) {
       this.currentGeneration.push({ row, column });
       this.previousGeneration.push({ row, column });
     } else {

@@ -21,7 +21,7 @@ export class GridDimensions {
 
 export type CellGenerationHandler = (liveCells: ICellPosition[]) => void;
 
-export default class ConwayGrid {
+export default class ConwayCalculator {
   private firstRow: number;
   private firstColumn: number;
   private grid: boolean[][];
