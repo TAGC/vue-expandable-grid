@@ -1,0 +1,14 @@
+language: node_js
+node_js:
+  - "stable"
+cache:
+  directories:
+    - "node_modules"
+deploy:
+  provider: npm
+  email: TAGC@users.noreply.github.com
+  api_key:
+    secure: ApwPEyIyitKq3xWIwVp2Om+Tro9qg60nyVEPE0pUmc4mifiqDRKS7x4e0NI4AERYzME/xdSD1eCJYhPpV4kISZTQ+CYum6nyeRjbWSEjxp6sHXfDDvCN1n3tr7iC/XFr202tw2K1/T3BvRe7mfs5oOPgyaTIYN/b3qo94qSajpvqOqXObT9jk52/lHLVhf0llLvxzXUwuWyOvztgCpsNcRGtdmYijhMx+a0beu49RUhO4McL6xDSt4lAKHqxxtr+IMe51NetkafHJo2TIeg8t+wOVpNR7l9zwfyYp3Z3xixTL8EYALhGd2aXaurN8y5fOZVDIVwCwUyvS2aW91q2WzSGk0wj1DDpRBxXnIaS9Q5FnW3M4XxLI4LdzkOviQYrQ0DUQBcLfv+N1466MourAdMeu1/713zk0usJt9dKjgp1X5YOsOEk+x2DxP+94CNlIyNUpcB6MDKuK09H3g0HLyvDvoAt5dPJ8BF6IVxb+3AsvDeNz+oR4mfpBR0A3635N3f0c67mcH7OhHoyoWv71ueEUeEeMILWPzO/qOY8gzkOzurK7UYpoYP1wvzVe2mYgcLZ5q3Tyqt4Y2JiDF0thTwGTwl5dOD3iZlL/TidWeUCiqxwgRylT6WmAI16/faCGpuuiVC2IUuAsr87ms26lnR7fi6PhZ40tclbM0NqVVw=
+  on:
+    tags: true
+    repo: TAGC/vue-expandable-grid
