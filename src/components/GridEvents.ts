@@ -11,6 +11,16 @@ interface IGridMouseEventArgs {
    * The y ordinate of the mouse event within the grid.
    */
   y: number;
+
+  /**
+   * The logical column the mouse event occurred within.
+   */
+  column: number;
+
+  /**
+   * The logical row the mouse event occurred within.
+   */
+  row: number;
 }
 
 /**

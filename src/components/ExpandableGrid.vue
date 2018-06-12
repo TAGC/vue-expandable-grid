@@ -11,7 +11,6 @@
         <slot v-if="data.isTile" name="grid-tile" :data="data">
           <DebugTile v-bind="data" :debug="data.key" />
         </slot>
-        <div v-else-if="data.isDummy"/>
         <slot v-else name="grid-item" :data="data" />
       </div>
     </VirtualCollection>
@@ -38,7 +37,7 @@ import { IGridClickEventArgs, IGridMouseMoveEventArgs, IGridResizeEventArgs } fr
 import GridManager from "./GridManager";
 import ItemPositioner, { IGridItem } from "./ItemPositioner";
 import ScrollManager, { IScrollEvent, ScrollSource } from "./ScrollManager";
-import TileGenerator, { ITile, ITileStatistics } from "./TileGenerator";
+import TileGenerator, { ITile, TileStatistics } from "./TileGenerator";
 import { DebugTile } from "./tiles";
 import ZoomManager from "./ZoomManager";
 
@@ -148,7 +147,7 @@ export default class ExpandableGrid extends Vue {
 
     Vue.nextTick(() => {
       this.onResize();
-      this.updateViewportPosition((x) => x, (y) => y);
+      this.updateScrollbars();
       this.itemPositioner.gridExtent = this.gridExtent;
       this.tileGenerator.gridExtent = this.gridExtent;
     });
@@ -199,7 +198,7 @@ export default class ExpandableGrid extends Vue {
     return ExtentCalculator.scaleExtent(logicalExtent, this.zoomLevel);
   }
 
-  private onTilesRegenerated(tiles: ITile[], statistics: ITileStatistics) {
+  private onTilesRegenerated(tiles: ITile[], statistics: TileStatistics) {
     this.tiles = tiles;
 
     const data: IGridResizeEventArgs = {
@@ -237,9 +236,14 @@ export default class ExpandableGrid extends Vue {
   }
 
   private onGridMouseMove(e: MouseEvent) {
-    const data: IGridMouseMoveEventArgs = this.toGridPosition({ x: e.clientX, y: e.clientY });
+    const position = this.toGridPosition({x: e.clientX, y: e.clientY });
 
-    if (this.isPositionInGrid(data)) {
+    if (this.isPositionInGrid(position)) {
+      const data: IGridClickEventArgs = {
+        ...position,
+        ...this.getColumnAndRowAtPosition(position),
+      };
+
       this.$emit("grid-mouse-moved", data);
     }
   }
@@ -253,9 +257,14 @@ export default class ExpandableGrid extends Vue {
       return;
     }
 
-    const data: IGridClickEventArgs = this.toGridPosition({x: e.clientX, y: e.clientY });
+    const position = this.toGridPosition({x: e.clientX, y: e.clientY });
 
-    if (this.isPositionInGrid(data)) {
+    if (this.isPositionInGrid(position)) {
+      const data: IGridClickEventArgs = {
+        ...position,
+        ...this.getColumnAndRowAtPosition(position),
+      };
+
       this.$emit("grid-clicked", data);
     }
   }
@@ -299,6 +308,7 @@ export default class ExpandableGrid extends Vue {
 
     this.tileGenerator.gridExtent = extent;
     this.itemPositioner.gridExtent = extent;
+    this.updateScrollbars();
   }
 
   @Watch("zoomLevel")
@@ -345,6 +355,13 @@ export default class ExpandableGrid extends Vue {
       updateX(this.physicalViewportExtent.x),
       updateY(this.physicalViewportExtent.y));
 
+    this.updateScrollbars();
+  }
+
+  /**
+   * Updates the positions of the scrollbars based on the physical viewport and grid extents.
+   */
+  private updateScrollbars() {
     const physicalGridExtent = ExtentCalculator.scaleExtent(this.gridExtent, this.zoomLevel);
     const scrollLeft = this.physicalViewportExtent.x - physicalGridExtent.x;
     const scrollTop = this.physicalViewportExtent.y - physicalGridExtent.y;
@@ -394,6 +411,13 @@ export default class ExpandableGrid extends Vue {
     };
 
     return gridCoordinates;
+  }
+
+  private getColumnAndRowAtPosition({x, y}: Position): { column: number, row: number } {
+    return {
+      column: Math.floor(x / this.tileSize),
+      row: Math.floor(y / this.tileSize),
+    };
   }
 }
 </script>

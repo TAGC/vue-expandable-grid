@@ -17,17 +17,20 @@ export interface ITile {
   };
 }
 
-export interface ITileStatistics {
-  firstRow: number;
-  firstColumn: number;
-  lastRow: number;
-  lastColumn: number;
+export class TileStatistics {
+  constructor(
+    readonly firstColumn: number,
+    readonly firstRow: number,
+    readonly lastColumn: number,
+    readonly lastRow: number) {
+
+  }
 }
 
 /**
  * Represents a callback to invoke when the grid tiles are regenerated.
  */
-export type TileRegeneratedHandler = (newTiles: ITile[], statistics: ITileStatistics) => void;
+export type TileRegeneratedHandler = (newTiles: ITile[], statistics: TileStatistics) => void;
 
 /**
  * A type of grid manager that handles the generation and positioning of grid tiles.
@@ -168,12 +171,17 @@ export default class TileGenerator extends GridManager<ITile> {
       }
     }
 
-    const statistics: ITileStatistics = {
-      firstRow,
-      firstColumn,
-      lastRow: firstRow + this.rows,
-      lastColumn: firstColumn + this.columns,
-    };
+    // The logical number of rows and columns differs from the real number due to offsets
+    // and variable sizes.
+    const logicalFirstRow = firstRow + 1;
+    const logicalFirstColumn = firstColumn + 1;
+    const logicalLastRow = firstRow + this.rows - 1;
+    const logicalLastColumn = firstColumn + this.columns - 1;
+    const statistics = new TileStatistics(
+      logicalFirstColumn,
+      logicalFirstRow,
+      logicalLastColumn,
+      logicalLastRow);
 
     this.onTilesRegenerated(tiles, statistics);
   }

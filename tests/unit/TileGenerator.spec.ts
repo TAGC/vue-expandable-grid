@@ -1,14 +1,20 @@
-import { Extent } from "@/components/ExtentCalculator";
-import TileGenerator, { ITile } from "@/components/TileGenerator";
+import { Extent, ZERO_EXTENT } from "@/components/ExtentCalculator";
+import TileGenerator, { ITile, TileStatistics } from "@/components/TileGenerator";
 import { expect } from "chai";
 import { Description } from "../util";
 
 describe("TileGenerator", () => {
   let tiles: ITile[] | null = null;
-  const onTilesGenerated = (newTiles) => tiles = newTiles;
+  let statistics: TileStatistics | null = null;
+
+  const onTilesGenerated = (newTiles, newStatistics) => {
+    tiles = newTiles;
+    statistics = newStatistics;
+  };
 
   beforeEach(() => {
     tiles = null;
+    statistics = null;
   });
 
   it("generates initial set of tiles on construction", () => {
@@ -28,6 +34,44 @@ describe("TileGenerator", () => {
     tiles!.forEach((tile) => expect(tile.data.size).to.equal(scaledTileSize));
   });
 
+  describe("publishes statistics on tile generation", () => {
+    const tileSize = 10;
+
+    type TestCase = { gridExtent: Extent; expectedStatistics: TileStatistics } & Description;
+
+    const testCases: TestCase[] = [
+      {
+        description: "when grid has zero extent",
+        gridExtent: ZERO_EXTENT,
+        expectedStatistics: new TileStatistics(0, 0, 0, 0),
+      },
+      {
+        description: "when grid has space for a single tile",
+        gridExtent: new Extent(0, 0, 10, 10),
+        expectedStatistics: new TileStatistics(0, 0, 1, 1),
+      },
+      {
+        description: "when grid is offset but aligns with tiles",
+        gridExtent: new Extent(-10, -20, 20, 50),
+        expectedStatistics: new TileStatistics(-1, -2, 1, 3),
+      },
+      {
+        description: "when grid is offset and misaligned with tiles",
+        gridExtent: new Extent(-5, -16, 22, 41),
+        expectedStatistics: new TileStatistics(0, -1, 1, 2),
+      },
+    ];
+
+    testCases.forEach(({ description, gridExtent, expectedStatistics }) => {
+      it(description, () => {
+        const tileGenerator = new TileGenerator(tileSize, (x) => x, onTilesGenerated);
+        tileGenerator.gridExtent = gridExtent;
+
+        expect(statistics).to.deep.equal(expectedStatistics);
+      });
+    });
+  });
+
   describe("generates tiles to fill grid", () => {
     type TestCase = { tileSize: number; gridExtent: Extent; expectedTiles: number } & Description;
 
@@ -35,7 +79,7 @@ describe("TileGenerator", () => {
       {
         description: "when grid has zero extent",
         tileSize: 1,
-        gridExtent: new Extent(0, 0, 0, 0),
+        gridExtent: ZERO_EXTENT,
         expectedTiles: 2 * 2,
       },
       {
@@ -51,25 +95,25 @@ describe("TileGenerator", () => {
         expectedTiles: 12 * 22,
       },
       {
-        description: "when grid begins slighly left of origin",
+        description: "when grid begins slightly left of origin",
         tileSize: 10,
         gridExtent: new Extent(-5, 0, 100, 200),
         expectedTiles: 11 * 22,
       },
       {
-        description: "when grid begins slighly right of origin",
+        description: "when grid begins slightly right of origin",
         tileSize: 10,
         gridExtent: new Extent(5, 0, 100, 200),
         expectedTiles: 12 * 22,
       },
       {
-        description: "when grid begins slighly above origin",
+        description: "when grid begins slightly above origin",
         tileSize: 10,
         gridExtent: new Extent(0, -5, 100, 200),
         expectedTiles: 12 * 21,
       },
       {
-        description: "when grid begins slighly below origin",
+        description: "when grid begins slightly below origin",
         tileSize: 10,
         gridExtent: new Extent(0, 5, 100, 200),
         expectedTiles: 12 * 22,
