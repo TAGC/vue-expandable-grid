@@ -14,7 +14,8 @@
     "build:demo": "vue-cli-service build --target app --name 'vue-expandable-grid' demo/src/main.ts",
     "lint": "vue-cli-service lint",
     "dev": "vue-cli-service serve demo/src/main.ts",
-    "test": "vue-cli-service test:unit"
+    "test": "vue-cli-service test:unit",
+    "prepublish": "npm run build"
   },
   "dependencies": {
     "lodash": "^4.17.10",
