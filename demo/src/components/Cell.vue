@@ -1,16 +1,16 @@
-<template>
-  <div :class="[alive ? 'cell-alive' : 'cell-dead']" />
+<template functional>
+  <div :class="[props.alive ? 'cell-alive' : 'cell-dead']" />
 </template>
 
 <script lang="ts">
-import Vue from "vue";
-import { Component, Prop } from "vue-property-decorator";
-
-@Component
-export default class Cell extends Vue {
-  @Prop({ required: true })
-  private alive: boolean;
-}
+export default {
+  props: {
+    alive: {
+      required: true,
+      type: Boolean,
+    },
+  },
+};
 </script>
 
 <style lang="scss" scoped>

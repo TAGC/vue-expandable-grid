@@ -1,9 +1,12 @@
 import * as _ from "lodash";
 
-class Cell {
-  public readonly row: number;
-  public readonly column: number;
-  public readonly isAlive: boolean;
+export interface ICellPosition {
+  readonly row: number;
+  readonly column: number;
+}
+
+export interface ICell extends ICellPosition {
+  readonly isAlive: boolean;
 }
 
 export class GridDimensions {
@@ -16,19 +19,19 @@ export class GridDimensions {
   }
 }
 
+export type CellGenerationHandler = (liveCells: ICellPosition[]) => void;
+
 export default class ConwayGrid {
   private firstRow: number;
   private firstColumn: number;
   private grid: boolean[][];
-  private habitability = 0.2;
 
-  constructor(initialDimensions: GridDimensions) {
+  constructor(readonly habitability: number, readonly onCellsGenerated: CellGenerationHandler) {
     this.firstRow = 0;
     this.firstColumn = 0;
     this.grid = [];
 
-    this.resize(initialDimensions);
-    this.spawnRandomCells();
+    this.resize(new GridDimensions(0, 0, 0, 0));
   }
 
   private get numberOfRows(): number {
@@ -48,7 +51,7 @@ export default class ConwayGrid {
   }
 
   public liveCellAt(row: number, column: number): boolean {
-    const { row: iRow, column: iColumn } = this.toGridIndices(row, column);
+    const { row: iRow, column: iColumn } = this.fromLogicalRowAndColumn(row, column);
 
     if (iRow < 0 || iRow >= this.numberOfRows || iColumn < 0 || iColumn >= this.numberOfColumns) {
       return false;
@@ -110,15 +113,18 @@ export default class ConwayGrid {
   }
 
   public nextGeneration() {
-    const dyingCells: Cell[] = [];
-    const revivingCells: Cell[] = [];
+    const dyingCells: ICell[] = [];
+    const revivingCells: ICell[] = [];
+    const nextGeneration: ICell[] = [];
     const visitedDeadCells = new Set<number>();
 
     for (const cell of this.getLiveCells()) {
       const neighbours = [...this.getNeighbours(cell)];
       const deadNeighbours = _.filter(neighbours, (it) => !it.isAlive);
 
-      if (!this.shouldCellBeAlive(cell)) {
+      if (this.shouldCellBeAlive(cell)) {
+        nextGeneration.push(cell);
+      } else {
         dyingCells.push(cell);
       }
 
@@ -131,6 +137,7 @@ export default class ConwayGrid {
 
         if (this.shouldCellBeAlive(deadNeighbour)) {
           revivingCells.push(deadNeighbour);
+          nextGeneration.push(deadNeighbour);
         }
 
         visitedDeadCells.add(positionHash);
@@ -144,40 +151,47 @@ export default class ConwayGrid {
     for (const cell of revivingCells) {
       this.reviveCell(cell);
     }
+
+    this.publishCells(nextGeneration);
   }
 
-  public spawnRandomCells() {
-    for (let row = 0; row < this.numberOfRows; row++) {
-      for (let column = 0; column < this.numberOfColumns; column++) {
-        this.grid[row][column] = this.trySpawnCell();
-      }
-    }
+  private publishCells(cells: ICell[]) {
+    const transform = (cell) => this.toLogicalRowAndColumn(cell.row, cell.column);
+
+    this.onCellsGenerated(cells.map(transform));
   }
 
   private trySpawnCell() {
     return Math.random() < this.habitability;
   }
 
-  private positionHashOfCell(cell: Cell): number {
+  private positionHashOfCell(cell: ICell): number {
     return cell.row * this.numberOfRows + cell.column;
   }
 
-  private toGridIndices(row: number, column: number): { row: number, column: number } {
+  private fromLogicalRowAndColumn(row: number, column: number): { row: number, column: number } {
     return {
       row: row - this.firstRow,
       column: column - this.firstColumn,
     };
   }
 
-  private killCell({ row, column }: Cell) {
+  private toLogicalRowAndColumn(row: number, column: number): { row: number, column: number } {
+    return {
+      row: row + this.firstRow,
+      column: column + this.firstColumn,
+    };
+  }
+
+  private killCell({ row, column }: ICell) {
     this.grid[row][column] = false;
   }
 
-  private reviveCell({ row, column }: Cell) {
+  private reviveCell({ row, column }: ICell) {
     this.grid[row][column] = true;
   }
 
-  private *getLiveCells(): IterableIterator<Cell> {
+  private *getLiveCells(): IterableIterator<ICell> {
     for (let row = 0; row < this.numberOfRows; row++) {
       for (let column = 0; column < this.numberOfColumns; column++) {
         if (this.grid[row][column]) {
@@ -187,7 +201,7 @@ export default class ConwayGrid {
     }
   }
 
-  private *getNeighbours({ row, column }: Cell): IterableIterator<Cell> {
+  private *getNeighbours({ row, column }: ICell): IterableIterator<ICell> {
     for (let i = row - 1; i <= row + 1; i++) {
       for (let j = column - 1; j <= column + 1; j++) {
         if (i === row && j === column) {
@@ -203,12 +217,12 @@ export default class ConwayGrid {
     }
   }
 
-  private countLiveNeighbours(cell: Cell): number {
+  private countLiveNeighbours(cell: ICell): number {
     const neighbours = [...this.getNeighbours(cell)];
     return _.sumBy(neighbours, (it) => it.isAlive ? 1 : 0);
   }
 
-  private shouldCellBeAlive(cell: Cell): boolean {
+  private shouldCellBeAlive(cell: ICell): boolean {
     const liveNeighbours = this.countLiveNeighbours(cell);
 
     if (cell.isAlive) {
