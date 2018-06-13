@@ -31,7 +31,7 @@ export interface IScrollPercentages {
  */
 export enum ScrollSource {
   Scrollbar,
-  Drag,
+  Pan,
 }
 
 /**
@@ -218,7 +218,7 @@ export default class ScrollManager {
     // making the grid scroll in the opposite direction to the mouse.
     this.onScrollChange({
       kind: "change",
-      source: ScrollSource.Drag,
+      source: ScrollSource.Pan,
       delta: { x: -deltaX, y: -deltaY },
     });
   }
@@ -232,7 +232,7 @@ export default class ScrollManager {
 
     this.onScrollChange({
       kind: "start",
-      source: this.isDraggingScrollbar ? ScrollSource.Scrollbar : ScrollSource.Drag,
+      source: this.isDraggingScrollbar ? ScrollSource.Scrollbar : ScrollSource.Pan,
     });
 
     this.lastIScrollPositions = this.currentIScrollPositions;
@@ -270,7 +270,7 @@ export default class ScrollManager {
     } else {
       this.onScrollChange({
         kind: "stop",
-        source: ScrollSource.Drag,
+        source: ScrollSource.Pan,
       });
     }
   }

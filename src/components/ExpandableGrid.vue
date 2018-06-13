@@ -82,9 +82,9 @@ export default class ExpandableGrid extends Vue {
   private tiles: ITile[] = [];
 
   /**
-   * Represents whether the user is actively dragging the grid around.
+   * Represents whether the user is actively panning the grid around.
    */
-  private dragging = false;
+  private panning = false;
 
   /**
    * The time that a mousedown event last occurred in the grid.
@@ -160,7 +160,7 @@ export default class ExpandableGrid extends Vue {
       position: "absolute",
       height: "100%",
       width: "100%",
-      cursor: this.dragging ? "move" : "default",
+      cursor: this.panning ? "move" : "default",
     };
   }
 
@@ -271,14 +271,14 @@ export default class ExpandableGrid extends Vue {
   private onGridScrolled(e: IScrollEvent) {
     switch (e.kind) {
       case "start":
-        if (e.source === ScrollSource.Drag) {
-          this.dragging = true;
+        if (e.source === ScrollSource.Pan) {
+          this.panning = true;
         }
         break;
 
       case "stop":
-        if (e.source === ScrollSource.Drag) {
-          this.dragging = false;
+        if (e.source === ScrollSource.Pan) {
+          this.panning = false;
         }
         break;
 
