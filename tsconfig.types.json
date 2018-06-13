@@ -5,6 +5,10 @@
     "target": "es2015",
     "sourceMap": true,
     "baseUrl": ".",
+    "outDir": "dist",
+    "declarationDir": "dist/typings",
+    "declaration": true,
+    "emitDeclarationOnly": true,
     "inlineSources": true,
     "forceConsistentCasingInFileNames": true,
     "suppressImplicitAnyIndexErrors": true,
@@ -19,6 +23,8 @@
     }
   },
   "exclude": [
+    "tests",
+    "demo",
     "node_modules",
     "dist"
   ]
