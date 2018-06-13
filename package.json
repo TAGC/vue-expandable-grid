@@ -1,6 +1,6 @@
 {
   "name": "vue-expandable-grid",
-  "version": "0.2.0-1",
+  "version": "0.2.0-2",
   "license": "MIT",
   "author": "TAGC",
   "main": "dist/vue-expandable-grid.common.js",
