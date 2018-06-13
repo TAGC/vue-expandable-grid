@@ -1,4 +1,3 @@
-import * as _ from "lodash";
 import { Extent, ZERO_EXTENT } from "./ExtentCalculator";
 import GridManager from "./GridManager";
 
@@ -29,7 +28,7 @@ export default class ItemPositioner extends GridManager<IGridItem> {
   }
 
   public canManage(object: any): object is IGridItem {
-    return !_.isUndefined(object.data) && !object.data.isTile;
+    return object.data && !object.data.isTile;
   }
 
   public position(item: IGridItem): Extent {

@@ -1,5 +1,5 @@
 <template>
-  <div ref="container" :style ="containerStyleObject">
+  <div ref="container" :style="containerStyleObject">
     <VirtualCollection
       ref="collection"
       :cellSizeAndPositionGetter="cellSizeAndPositionGetter"
@@ -19,7 +19,7 @@
 </template>
 
 <script lang="ts">
-import * as _ from "lodash";
+import { isEqual, range } from "lodash";
 import { setTimeout } from "timers";
 import Vue from "vue";
 import { Component, Prop, Watch } from "vue-property-decorator";
@@ -121,7 +121,7 @@ export default class ExpandableGrid extends Vue {
   /**
    * The different possible levels that the grid can be zoomed in and out at.
    */
-  @Prop({ default: () => new Set(_.range(8, 21).map((x) => x / 10)) })
+  @Prop({ default: () => new Set(range(8, 21).map((x) => x / 10)) })
   private zoomLevels: Set<number> | number[];
 
   /**
@@ -302,7 +302,7 @@ export default class ExpandableGrid extends Vue {
 
   @Watch("gridExtent")
   private onGridExtentChanged(extent: Extent, lastExtent: Extent) {
-    if (_.isEqual(extent, lastExtent)) {
+    if (isEqual(extent, lastExtent)) {
       return;
     }
 

@@ -1,4 +1,3 @@
-import * as _ from "lodash";
 import { Extent, ZERO_EXTENT } from "./ExtentCalculator";
 import GridManager from "./GridManager";
 
@@ -121,7 +120,7 @@ export default class TileGenerator extends GridManager<ITile> {
   }
 
   public canManage(object: any): object is ITile {
-    return !_.isUndefined(object.data) && object.data.isTile;
+    return object.data && object.data.isTile;
   }
 
   public position({ data: tile }: ITile): Extent {
@@ -152,8 +151,8 @@ export default class TileGenerator extends GridManager<ITile> {
     // to account for this.
     const physicalTileSize = this.scaleTile(this.tileSize);
 
-    for (const columnIndex of _.range(this.columns)) {
-      for (const rowIndex of _.range(this.rows)) {
+    for (let columnIndex = 0; columnIndex < this.columns; columnIndex++) {
+      for (let rowIndex = 0; rowIndex < this.rows; rowIndex++) {
         const column = firstColumn + columnIndex;
         const row = firstRow + rowIndex;
 

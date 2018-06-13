@@ -1,4 +1,4 @@
-import * as _ from "lodash";
+import { filter, sumBy } from "lodash";
 
 export interface ICellPosition {
   readonly row: number;
@@ -131,7 +131,7 @@ export default class ConwayCalculator {
 
     for (const cell of this.getLiveCells()) {
       const neighbours = [...this.getNeighbours(cell)];
-      const deadNeighbours = _.filter(neighbours, (it) => !it.isAlive);
+      const deadNeighbours = filter(neighbours, (it) => !it.isAlive);
 
       if (this.shouldCellBeAlive(cell)) {
         nextGeneration.push(cell);
@@ -230,7 +230,7 @@ export default class ConwayCalculator {
 
   private countLiveNeighbours(cell: ICell): number {
     const neighbours = [...this.getNeighbours(cell)];
-    return _.sumBy(neighbours, (it) => it.isAlive ? 1 : 0);
+    return sumBy(neighbours, (it) => it.isAlive ? 1 : 0);
   }
 
   private shouldCellBeAlive(cell: ICell): boolean {

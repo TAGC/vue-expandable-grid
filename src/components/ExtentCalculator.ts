@@ -1,4 +1,4 @@
-import * as _ from "lodash";
+import { isEmpty } from "lodash";
 
 /**
  * Represents the position of an entity on a cartesian plane.
@@ -182,7 +182,7 @@ export default class ExtentCalculator {
    * @return the smallest extent that encapsulates `extents`
    */
   private static reduceExtents(extents: Extent[]): Extent {
-    if (!extents || _.isEmpty(extents)) {
+    if (!extents || isEmpty(extents)) {
       return ZERO_EXTENT;
     }
 

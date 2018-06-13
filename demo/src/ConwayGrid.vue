@@ -15,8 +15,6 @@
 </template>
 
 <script lang="ts">
-import * as _ from "lodash";
-
 import ExpandableGrid, {
   DebugTile,
   Extent,
@@ -27,6 +25,7 @@ import ExpandableGrid, {
   SolidTile,
 } from "@/.";
 import { ZERO_EXTENT } from "@/components/ExtentCalculator";
+import { differenceWith, intersectionWith, isEqual } from "lodash";
 import Vue from "vue";
 import { Component, Prop, Watch } from "vue-property-decorator";
 import Cell, { State as CellState } from "./Cell.vue";
@@ -68,19 +67,19 @@ export default class ConwayGrid extends Vue {
   }
 
   private get bornCells(): IGridItem[] {
-    const cells = _.differenceWith(this.currentGeneration, this.previousGeneration, _.isEqual);
+    const cells = differenceWith(this.currentGeneration, this.previousGeneration, isEqual);
 
     return cells.map((cell) => this.displayCell(cell, "born"));
   }
 
   private get stableCells(): IGridItem[] {
-    const cells = _.intersectionWith(this.currentGeneration, this.previousGeneration, _.isEqual);
+    const cells = intersectionWith(this.currentGeneration, this.previousGeneration, isEqual);
 
     return cells.map((cell) => this.displayCell(cell, "stable"));
   }
 
   private get dyingCells(): IGridItem[] {
-    const cells = _.differenceWith(this.previousGeneration, this.currentGeneration, _.isEqual);
+    const cells = differenceWith(this.previousGeneration, this.currentGeneration, isEqual);
 
     return cells.map((cell) => this.displayCell(cell, "dying"));
   }
@@ -148,7 +147,7 @@ export default class ConwayGrid extends Vue {
       this.currentGeneration.push({ row, column });
       this.previousGeneration.push({ row, column });
     } else {
-      const isNotToggledCell = (cell) => !_.isEqual(cell, { row, column });
+      const isNotToggledCell = (cell) => !isEqual(cell, { row, column });
       this.currentGeneration = this.currentGeneration.filter(isNotToggledCell);
       this.previousGeneration = this.previousGeneration.filter(isNotToggledCell);
     }

@@ -1,4 +1,4 @@
-import * as _ from "lodash";
+import { sortBy } from "lodash";
 
 /**
  * Represents a callback that is invoked to handle a change in the zoom level.
@@ -18,7 +18,7 @@ export default class ZoomManager {
       throw new Error("Zoom levels set does not contain required zoom level of 1");
     }
 
-    this.zoomLevels = _.sortBy([...zoomLevels]);
+    this.zoomLevels = sortBy([...zoomLevels]);
     this.defaultZoomLevelIndex = this.zoomLevels.indexOf(1);
     this.resetZoom();
   }
