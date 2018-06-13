@@ -20,7 +20,6 @@
 
 <script lang="ts">
 import { isEqual, range } from "lodash";
-import { setTimeout } from "timers";
 import Vue from "vue";
 import { Component, Prop, Watch } from "vue-property-decorator";
 import VueResize from "vue-resize";
