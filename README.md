@@ -1,5 +1,8 @@
 # vue-expandable-grid
 
+[![npm version](https://badge.fury.io/js/vue-expandable-grid.svg)](https://badge.fury.io/js/vue-expandable-grid)
+[![Build Status](https://travis-ci.org/TAGC/vue-expandable-grid.svg?branch=master)](https://travis-ci.org/TAGC/vue-expandable-grid)
+
 Vue component that acts as a grid that can expand indefinitely in all directions. This library builds upon Weijia Wang's [vue-virtual-collection](https://github.com/starkwang/vue-virtual-collection).
 
 ## Features
