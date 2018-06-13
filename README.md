@@ -7,11 +7,18 @@ Vue component that acts as a grid that can expand indefinitely in all directions
 
 ## Features
 
-- Supports zooming in and out. Zoom levels are customisable.
-- Publishes grid mouse events (move and click) & zoom events.
-- Customisable grid tiles.
-- Small catalog of pre-made grid tiles.
-- Allows adding arbitrary items to the grid.
+- Supports various forms of grid navigation:
+  - Panning
+  - Scrolling
+  - Zooming (zoom levels are customisable)
+- Publishes grid-related events:
+  - On resizing the grid
+  - On zooming in and out
+  - On moving the mouse around the grid
+  - On clicking somewhere in the grid
+- Customisable grid tiles
+  - Pre-made catalog of grid tiles included
+- Allows placing arbitrary items on the grid
 
 ## Usage
 
