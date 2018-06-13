@@ -12,3 +12,4 @@ deploy:
   on:
     tags: true
     repo: TAGC/vue-expandable-grid
+  skip_cleanup: true
