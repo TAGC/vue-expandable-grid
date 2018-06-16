@@ -1,22 +1,9 @@
 <template>
   <div id="app">
-    <div>
-      <md-card>
-        <md-card-content class="grid-controls">
-          <md-field class="field">
-            <label for="cell-size">Cell size</label>
-            <md-input type="number" name="cell-size" id="cell-size" v-model.number="cellSize"/>
-          </md-field>
-          <md-field class="field">
-            <label for="cell-regen-rate">Cell regeneration rate</label>
-            <md-input type="number" name="cell-regen-rate" id="cell-regen-rate" v-model.number="cellRegenerationRate"/>
-          </md-field>
-          <md-field class="field">
-            <label for="habitability">Habitability</label>
-            <md-input type="number" name="habitability" id="habitability" v-model.number="habitability"/>
-          </md-field>
-        </md-card-content>
-      </md-card>
+    <div class="controls md-card-content">
+      We can use vue-expandable-grid to create an indefinitely-large Conway's Game of Life.
+      <br />
+      Try setting the cell size to <Control v-model="cellSize" :width="40" /> px.
     </div>
     <ConwayGrid
       :minExtent="minGridExtent"
@@ -31,9 +18,10 @@
 import { Extent } from "@/.";
 import Vue from "vue";
 import { Component } from "vue-property-decorator";
+import Control from "./Control.vue";
 import ConwayGrid from "./ConwayGrid.vue";
 
-@Component({ components: { ConwayGrid } })
+@Component({ components: { ConwayGrid, Control } })
 export default class App extends Vue {
   private cellSize = 50;
   private cellRegenerationRate = 1000;
@@ -46,26 +34,25 @@ export default class App extends Vue {
 </script>
 
 <style lang="scss" scoped>
+@import "variables";
+
 #app {
   display: grid;
-  grid-template-columns: auto 1fr;
-  grid-column-gap: 10px;
   height: 100vh;
   width: 100vw;
   position: relative;
 }
 
-.grid-controls {
-  display: grid;
-  grid-auto-rows: auto;
-  grid-row-gap: 20px;
-  align-items: end;
-  align-content: start;
-}
-
-.field {
-  margin-left: 10px;
-  margin-bottom: 0px;
+.controls {
+  font-size: $font-size;
+  position: absolute;
+  left: 20px;
+  top: 20px;
+  width: 40vw;
+  z-index: 1;
+  background: white;
+  border-radius: 5px;
+  border: 2px solid black;
 }
 </style>
 
