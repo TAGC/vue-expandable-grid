@@ -239,7 +239,7 @@ export default class ScrollManager {
     this.lastMousePosition = { x: e.clientX, y: e.clientY };
 
     // Allows mouse up events to be received even if the mouse is moved in-between.
-    e.preventDefault();
+    // e.preventDefault();
   }
 
   private onMouseUp(e: MouseEvent) {

@@ -264,7 +264,7 @@ export default class ExpandableGrid extends Vue {
         ...this.getColumnAndRowAtPosition(position),
       };
 
-      this.$emit("grid-clicked", data);
+      // this.$emit("grid-clicked", data);
     }
   }
 

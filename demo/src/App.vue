@@ -1,58 +1,50 @@
 <template>
   <div id="app">
-    <div class="controls md-card-content">
-      We can use vue-expandable-grid to create an indefinitely-large Conway's Game of Life.
-      <br />
-      Try setting the cell size to <Control v-model="cellSize" :width="40" /> px.
-    </div>
     <ConwayGrid
       :minExtent="minGridExtent"
       :cellSize="cellSize"
       :cellRegenerationRate="cellRegenerationRate"
       :habitability="habitability"
-    />
+      :paused="paused"
+      :additionalItems="cards"
+    >
+      <IntroCard slot="additional-item" slot-scope="{data}" @stable="paused = !$event" />
+    </ConwayGrid>
   </div>
 </template>
 
 <script lang="ts">
-import { Extent } from "@/.";
+import { Extent, IGridItem } from "@/.";
 import Vue from "vue";
 import { Component } from "vue-property-decorator";
-import Control from "./Control.vue";
+import { IntroCard } from "./cards";
 import ConwayGrid from "./ConwayGrid.vue";
 
-@Component({ components: { ConwayGrid, Control } })
+@Component({ components: { ConwayGrid, IntroCard } })
 export default class App extends Vue {
   private cellSize = 50;
   private cellRegenerationRate = 1000;
   private habitability = 0.25;
+  private paused = false;
 
   private get minGridExtent(): Extent {
     return new Extent(-200, -200, 400, 400);
+  }
+
+  private get cards(): IGridItem[] {
+    return [
+      { x: -150, y: -150, width: 300, height: 300, data: { } },
+    ];
   }
 }
 </script>
 
 <style lang="scss" scoped>
-@import "variables";
-
 #app {
   display: grid;
   height: 100vh;
   width: 100vw;
   position: relative;
-}
-
-.controls {
-  font-size: $font-size;
-  position: absolute;
-  left: 20px;
-  top: 20px;
-  width: 40vw;
-  z-index: 1;
-  background: white;
-  border-radius: 5px;
-  border: 2px solid black;
 }
 </style>
 

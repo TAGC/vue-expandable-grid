@@ -22,9 +22,13 @@ export default class Cell extends Vue {
   @Prop({ required: true })
   private state: State;
 
+  @Prop({ default: false })
+  private paused: boolean;
+
   private get styleObject() {
     return {
-      transition: `opacity ${this.fadeRate}s linear`,
+      "transition": `opacity ${this.fadeRate}s linear`,
+      "--opacity-modifier": this.paused ? 0.5 : 1,
     };
   }
 }
@@ -36,15 +40,15 @@ export default class Cell extends Vue {
   width: 100%;
 
   &.born {
-    opacity: 0.5;
+    opacity: calc(0.5 * var(--opacity-modifier));
   }
 
   &.dying {
-    opacity: 0.25;
+    opacity: calc(0.25 * var(--opacity-modifier));
   }
 
   &.stable {
-    opacity: 1;
+    opacity: calc(1 * var(--opacity-modifier));
   }
 }
 </style>
