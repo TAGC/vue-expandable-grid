@@ -17,12 +17,12 @@
     "build": "npm run build:lib && npm run build:types",
     "build:lib": "vue-cli-service build --target lib src/index.ts",
     "build:types": "tsc -p tsconfig.types.json && cp -R typings/* dist/typings",
-    "build:demo": "vue-cli-service build --target app --name 'vue-expandable-grid' demo/src/main.ts",
+    "build:demo": "cross-env DEMO=1 vue-cli-service build --target app --name 'vue-expandable-grid' --dest demo/dist demo/src/main.ts",
     "lint": "vue-cli-service lint",
-    "dev": "vue-cli-service serve demo/src/main.ts",
+    "dev": "cross-env DEMO=1 vue-cli-service serve demo/src/main.ts",
     "test": "vue-cli-service test:unit",
     "prepublishOnly": "npm run build",
-    "clean": "rimraf dist"
+    "clean": "rimraf dist demo/dist"
   },
   "dependencies": {
     "lodash": "^4.17.10",
@@ -44,6 +44,7 @@
     "@vue/test-utils": "^1.0.0-beta.18",
     "ajv": "^6.5.1",
     "chai": "^4.1.2",
+    "cross-env": "^5.2.0",
     "node-sass": "^4.9.0",
     "rimraf": "^2.6.2",
     "sass-loader": "^7.0.3",
