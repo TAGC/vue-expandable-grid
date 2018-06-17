@@ -91,7 +91,7 @@ export default class ScrollManager {
     this.lastMousePosition = { x: 0, y: 0 };
 
     grid.addEventListener("mousemove", (e) => this.onMouseMove(e as MouseEvent), { passive: true });
-    grid.addEventListener("mousedown", (e) => this.onMouseDown(e as MouseEvent));
+    grid.addEventListener("mousedown", (e) => this.onMouseDown(e as MouseEvent), { passive: true });
     grid.addEventListener("mouseup", (e) => this.onMouseUp(e as MouseEvent), { passive: true });
   }
 

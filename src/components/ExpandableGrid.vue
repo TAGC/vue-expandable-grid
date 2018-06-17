@@ -126,8 +126,14 @@ export default class ExpandableGrid extends Vue {
   /**
    * The forced minimum extent of the grid.
    */
-  @Prop({default: () => ZERO_EXTENT})
+  @Prop({ default: () => ZERO_EXTENT })
   private minExtent: Extent;
+
+  /**
+   * If true, the grid origin is centered within the viewport when this component is mounted.
+   */
+  @Prop({ default: false, type: Boolean })
+  private startCentered: false;
 
   public mounted() {
     // Captures the dimensions of the root element before the VirtualCollection is mounted to
@@ -149,6 +155,13 @@ export default class ExpandableGrid extends Vue {
       this.updateScrollbars();
       this.itemPositioner.gridExtent = this.gridExtent;
       this.tileGenerator.gridExtent = this.gridExtent;
+
+      if (this.startCentered) {
+        const viewportExtent = this.logicalViewportExtent;
+        this.updateViewportPosition(
+          (x) => x - viewportExtent.width / 2,
+          (y) => y - viewportExtent.height / 2);
+      }
     });
   }
 
@@ -184,7 +197,9 @@ export default class ExpandableGrid extends Vue {
   private cellSizeAndPositionGetter(object: IGridItem | ITile): Extent {
     let logicalExtent: Extent;
 
-    if (this.tileGenerator.canManage(object)) {
+    if (!this.tileGenerator || !this.itemPositioner) {
+      return ZERO_EXTENT;
+    } else if (this.tileGenerator.canManage(object)) {
       logicalExtent = this.tileGenerator.position(object);
     } else if (this.itemPositioner.canManage(object)) {
       logicalExtent = this.itemPositioner.position(object);
@@ -264,7 +279,7 @@ export default class ExpandableGrid extends Vue {
         ...this.getColumnAndRowAtPosition(position),
       };
 
-      // this.$emit("grid-clicked", data);
+      this.$emit("grid-clicked", data);
     }
   }
 
