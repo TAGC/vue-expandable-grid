@@ -8,7 +8,7 @@
       :paused="paused"
       :additionalItems="cards"
     >
-      <IntroCard slot="additional-item" slot-scope="{data}" @stable="paused = !$event" />
+      <component :is="data.component" slot="additional-item" slot-scope="{data}" @stable="paused = !$event" />
     </ConwayGrid>
   </div>
 </template>
@@ -17,10 +17,10 @@
 import { Extent, IGridItem } from "@/.";
 import Vue from "vue";
 import { Component } from "vue-property-decorator";
-import { IntroCard } from "./cards";
+import { IntroCard, TileSizeCard } from "./cards";
 import ConwayGrid from "./ConwayGrid.vue";
 
-@Component({ components: { ConwayGrid, IntroCard } })
+@Component({ components: { ConwayGrid, IntroCard, TileSizeCard } })
 export default class App extends Vue {
   private cellSize = 50;
   private cellRegenerationRate = 1000;
@@ -33,8 +33,18 @@ export default class App extends Vue {
 
   private get cards(): IGridItem[] {
     return [
-      { x: -150, y: -150, width: 300, height: 300, data: { } },
+      this.createCard("IntroCard", new Extent(-150, -150, 300, 300)),
+      this.createCard("TileSizeCard", new Extent(900, -150, 300, 300)),
     ];
+  }
+
+  private createCard(identifier: string, extent: Extent) {
+    return {
+      ...extent,
+      data: {
+        component: identifier,
+      },
+    };
   }
 }
 </script>

@@ -62,7 +62,7 @@ export default class ConwayGrid extends Vue {
 
   public mounted() {
     this.conwayGrid = new ConwayCalculator(this.habitability, this.onCellsGenerated);
-    // this.toggleRegeneration(this.paused);
+    this.toggleRegeneration(this.paused);
   }
 
   private get styleObject() {
@@ -139,6 +139,7 @@ export default class ConwayGrid extends Vue {
   }
 
   private onGridClicked({ row, column }: IGridClickEventArgs) {
+    console.log("Grid clicked", row, column);
     // this.conwayGrid!.toggleCellAtPosition(row, column);
 
     // // Skips the transitional states (born, dying) after adding/removing the cell.
