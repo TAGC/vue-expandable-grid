@@ -31,7 +31,17 @@ export type IGridMouseMoveEventArgs = IGridMouseEventArgs;
 /**
  * Represents the data associated with a grid mouse down event.
  */
-export type IGridClickEventArgs = IGridMouseEventArgs;
+export interface IGridClickEventArgs extends IGridMouseEventArgs {
+  /**
+   * True if an item was clicked, otherwise false.
+   */
+  itemClicked: boolean;
+
+  /**
+   * If an item was clicked, the ID of the item if it has one. Otherwise undefined.
+   */
+  itemId?: string;
+}
 
 /**
  * Represents the data associated with grid resize events.

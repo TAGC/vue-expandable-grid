@@ -1,4 +1,4 @@
-import { isEmpty } from "lodash";
+import { isEmpty, isEqual } from "lodash";
 
 /**
  * Represents the position of an entity on a cartesian plane.
@@ -159,6 +159,22 @@ export default class ExtentCalculator {
    */
   public static descalePosition(position: Position, scaleFactor: number) {
     return ExtentCalculator.scalePosition(position, 1 / scaleFactor);
+  }
+
+  /**
+   * Returns whether `position` is contained within `extent`.
+   *
+   * A position is still considered within the extent if it exists on its boundary.
+   *
+   * @param position the position to test
+   * @param extent the extent to check the position lies within
+   * @return true if the position is inside the extent, otherwise false
+   */
+  public static isPositionInExtent(position: Position, extent: Extent) {
+    const positionExtent = new Extent(position.x, position.y, 0, 0);
+    const newExtent = ExtentCalculator.reduceExtents([positionExtent, extent]);
+
+    return isEqual(extent, newExtent);
   }
 
   /**

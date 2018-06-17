@@ -5,6 +5,7 @@ import GridManager from "./GridManager";
  * Represents an item that can be placed on the grid.
  */
 export interface IGridItem {
+  id?: string;
   data: any;
   extent: Extent | TileExtent;
 }

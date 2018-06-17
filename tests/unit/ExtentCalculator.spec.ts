@@ -5,6 +5,7 @@ import ExtentCalculator, {
   ZERO_EXTENT,
 } from "@/components/ExtentCalculator";
 import { expect } from "chai";
+import { Description } from "../util";
 
 describe("ExtentCalculator", () => {
   it("scales positions", () => {
@@ -64,6 +65,56 @@ describe("ExtentCalculator", () => {
       .is.at.least(forcedMinimumExtent.y + forcedMinimumExtent.height);
   });
 
+  describe("tests whether positions are contained within extents", () => {
+    type TestCase = { position: Position, extent: Extent, expectation: boolean } & Description;
+
+    const testCases: TestCase[] = [
+      {
+        description: "when extent has no size and position lies on it",
+        position: new Position(0, 0),
+        extent: new Extent(0, 0, 0, 0),
+        expectation: true,
+      },
+      {
+        description: "when extent has no size and position lies off of it",
+        position: new Position(0, 1),
+        extent: new Extent(0, 0, 0, 0),
+        expectation: false,
+      },
+      {
+        description: "when position lies on bottom boundary of extent",
+        position: new Position(5, 20),
+        extent: new Extent(5, 10, 20, 10),
+        expectation: true,
+      },
+      {
+        description: "when position lies on left boundary of extent",
+        position: new Position(15, 6),
+        extent: new Extent(-10, 5, 25, 3),
+        expectation: true,
+      },
+      {
+        description: "when position lies entirely within extent",
+        position: new Position(15, 25),
+        extent: new Extent(0, 0, 100, 100),
+        expectation: true,
+      },
+      {
+        description: "when position lies entirely outside extent",
+        position: new Position(15, 25),
+        extent: new Extent(-100, -100, 100, 100),
+        expectation: false,
+      },
+    ];
+
+    testCases.forEach(({ description, position, extent, expectation }) => {
+      it(description, () => {
+        const result = ExtentCalculator.isPositionInExtent(position, extent);
+        expect(result).to.equal(expectation);
+      });
+    });
+  });
+
   describe("calculates the minimum grid extent from viewport at:", () => {
     type TestCase = { position: string, viewport: Extent, grid: Extent };
     const testCases: TestCase[] = [
@@ -106,7 +157,7 @@ describe("ExtentCalculator", () => {
     const viewport = new Extent(20, 50, 100, 200);
     const tileSize = 10;
 
-    type TestCase = { description: string, items: Array<Extent | TileExtent>, grid: Extent };
+    type TestCase = { items: Array<Extent | TileExtent>, grid: Extent } & Description;
     const testCases: TestCase[] = [
       {
         description: "no items in grid",

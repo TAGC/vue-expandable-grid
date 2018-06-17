@@ -59,11 +59,12 @@ export default class App extends Vue {
     ];
   }
 
-  private createCard(identifier: string, extent: TileExtent) {
+  private createCard(id: string, extent: TileExtent) {
     return {
+      id,
       extent,
       data: {
-        component: identifier,
+        component: id,
       },
     };
   }

@@ -29,6 +29,7 @@ import ExtentCalculator, {
   ORIGIN,
   Position,
   Size,
+  TileExtent,
   ZERO_EXTENT,
   ZERO_SIZE,
 } from "./ExtentCalculator";
@@ -256,7 +257,7 @@ export default class ExpandableGrid extends Vue {
     const position = this.toGridPosition({x: e.clientX, y: e.clientY });
 
     if (this.isPositionInGrid(position)) {
-      const data: IGridClickEventArgs = {
+      const data: IGridMouseMoveEventArgs = {
         ...position,
         ...this.getColumnAndRowAtPosition(position),
       };
@@ -275,11 +276,31 @@ export default class ExpandableGrid extends Vue {
     }
 
     const position = this.toGridPosition({x: e.clientX, y: e.clientY });
+    const itemClicked = this.items.find((item) => {
+      let extent: Extent;
+
+      switch (item.extent.type) {
+        case "Extent":
+          extent = item.extent;
+          break;
+
+        case "TileExtent":
+          extent = TileExtent.toExtent(item.extent, this.tileSize);
+          break;
+
+        default:
+          throw new Error("Invalid item extent");
+      }
+
+      return ExtentCalculator.isPositionInExtent(position, extent);
+    });
 
     if (this.isPositionInGrid(position)) {
       const data: IGridClickEventArgs = {
         ...position,
         ...this.getColumnAndRowAtPosition(position),
+        itemClicked: itemClicked !== undefined,
+        itemId: itemClicked && itemClicked.id,
       };
 
       this.$emit("grid-clicked", data);

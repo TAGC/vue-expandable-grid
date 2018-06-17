@@ -102,6 +102,7 @@ export default class ConwayGrid extends Vue {
 
   private displayCell({ column, row }: ICellPosition, state: CellState): IGridItem {
     return {
+      id: "live cell",
       data: { state, isCell: true },
       extent: new TileExtent(column, row, 1, 1),
     };
@@ -139,19 +140,19 @@ export default class ConwayGrid extends Vue {
     this.zoomLevel = zoomLevel;
   }
 
-  private onGridClicked({ row, column }: IGridClickEventArgs) {
-    console.log("Grid clicked", row, column);
-    // this.conwayGrid!.toggleCellAtPosition(row, column);
+  private onGridClicked({ row, column, itemId }: IGridClickEventArgs) {
+    switch (itemId) {
+      case "live cell":
+        const isNotToggledCell = (cell) => !isEqual(cell, { row, column });
+        this.conwayGrid!.toggleCellAtPosition(row, column);
+        this.currentGeneration = this.currentGeneration.filter(isNotToggledCell);
+        this.previousGeneration = this.previousGeneration.filter(isNotToggledCell);
 
-    // // Skips the transitional states (born, dying) after adding/removing the cell.
-    // if (this.conwayGrid!.isCellAlive(row, column)) {
-    //   this.currentGeneration.push({ row, column });
-    //   this.previousGeneration.push({ row, column });
-    // } else {
-    //   const isNotToggledCell = (cell) => !isEqual(cell, { row, column });
-    //   this.currentGeneration = this.currentGeneration.filter(isNotToggledCell);
-    //   this.previousGeneration = this.previousGeneration.filter(isNotToggledCell);
-    // }
+      case undefined:
+        this.conwayGrid!.toggleCellAtPosition(row, column);
+        this.currentGeneration.push({ row, column });
+        this.previousGeneration.push({ row, column });
+    }
   }
 
   private onCellsGenerated(cells: ICellPosition[]) {
