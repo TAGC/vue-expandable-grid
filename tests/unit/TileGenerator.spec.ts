@@ -18,16 +18,24 @@ describe("TileGenerator", () => {
   });
 
   it("generates initial set of tiles on construction", () => {
-    const _ = new TileGenerator(100, (x) => x, onTilesGenerated);
+    const _ = new TileGenerator((x) => x, onTilesGenerated);
     expect(tiles).to.not.be.null;
-    expect(tiles).to.have.lengthOf(2 * 2);
+    expect(tiles).to.be.empty;
+  });
+
+  it("regenerates tiles when tile size changed", () => {
+    const tileGenerator = new TileGenerator((x) => x, onTilesGenerated);
+    tileGenerator.tileSize = 100;
+    expect(tiles).to.not.be.null;
+    expect(tiles).to.have.lengthOf(4);
   });
 
   it("scales tile sizes using the provided callback", () => {
     const tileSize = 100;
     const scaleFactor = 5;
     const scaleTiles = (size) => size * scaleFactor;
-    const tileGenerator = new TileGenerator(tileSize, scaleTiles, onTilesGenerated);
+    const tileGenerator = new TileGenerator(scaleTiles, onTilesGenerated);
+    tileGenerator.tileSize = tileSize;
     tileGenerator.gridExtent = new Extent(0, 0, tileSize, tileSize);
 
     const scaledTileSize = tileSize * scaleFactor;
@@ -64,7 +72,8 @@ describe("TileGenerator", () => {
 
     testCases.forEach(({ description, gridExtent, expectedStatistics }) => {
       it(description, () => {
-        const tileGenerator = new TileGenerator(tileSize, (x) => x, onTilesGenerated);
+        const tileGenerator = new TileGenerator((x) => x, onTilesGenerated);
+        tileGenerator.tileSize = tileSize;
         tileGenerator.gridExtent = gridExtent;
 
         expect(statistics).to.deep.equal(expectedStatistics);
@@ -122,7 +131,8 @@ describe("TileGenerator", () => {
 
     testCases.forEach(({ description, tileSize, gridExtent, expectedTiles }) => {
       it(description, () => {
-        const tileGenerator = new TileGenerator(tileSize, (x) => x, onTilesGenerated);
+        const tileGenerator = new TileGenerator((x) => x, onTilesGenerated);
+        tileGenerator.tileSize = tileSize;
         tileGenerator.gridExtent = gridExtent;
 
         expect(tiles).to.have.lengthOf(expectedTiles);
@@ -140,7 +150,8 @@ describe("TileGenerator", () => {
 
     const test = ({ description, tile, extent }: TestCase, grid: Extent) => {
       it(description, () => {
-        const tileGenerator = new TileGenerator(tile.data.size, (x) => x, onTilesGenerated);
+        const tileGenerator = new TileGenerator((x) => x, onTilesGenerated);
+        tileGenerator.tileSize = tile.data.size;
         tileGenerator.gridExtent = grid;
 
         const actualTileExtent = tileGenerator.position(tile);

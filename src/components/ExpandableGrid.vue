@@ -146,16 +146,18 @@ export default class ExpandableGrid extends Vue {
     this.collection.addEventListener("click", this.onGridClicked, { passive: true });
     this.collection.addEventListener("mousemove", this.onGridMouseMove, { passive: true });
     this.itemPositioner = new ItemPositioner();
-    this.tileGenerator = new TileGenerator(this.tileSize, this.scaleTile, this.onTilesRegenerated);
+    this.tileGenerator = new TileGenerator(this.scaleTile, this.onTilesRegenerated);
     this.scrollManager = new ScrollManager(this.collection, this.onGridScrolled);
     this.zoomManager = new ZoomManager(new Set([...this.zoomLevels]), this.onZoomLevelChanged);
 
     Vue.nextTick(() => {
       this.onResize();
       this.updateScrollbars();
+      this.onTileSizeChanged(this.tileSize, 0);
       this.itemPositioner.gridExtent = this.gridExtent;
       this.tileGenerator.gridExtent = this.gridExtent;
 
+      // Center the viewport on the grid origin if necessary.
       if (this.startCentered) {
         const viewportExtent = this.logicalViewportExtent;
         this.updateViewportPosition(
@@ -191,7 +193,8 @@ export default class ExpandableGrid extends Vue {
     return ExtentCalculator.calculateGridExtent(
       this.logicalViewportExtent,
       this.minExtent,
-      this.items);
+      this.tileSize,
+      this.items.map((item) => item.extent));
   }
 
   private cellSizeAndPositionGetter(object: IGridItem | ITile): Extent {
@@ -312,6 +315,16 @@ export default class ExpandableGrid extends Vue {
       this.physicalViewportExtent,
       this.collectionSize.width - scrollbarWidth,
       this.collectionSize.height - scrollbarHeight);
+  }
+
+  @Watch("tileSize")
+  private onTileSizeChanged(tileSize: number, lastTileSize: number) {
+    if (tileSize === lastTileSize) {
+      return;
+    }
+
+    this.itemPositioner.tileSize = tileSize;
+    this.tileGenerator.tileSize = tileSize;
   }
 
   @Watch("gridExtent")

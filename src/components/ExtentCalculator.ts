@@ -22,7 +22,6 @@ export class Size {
  * Represents the extent an entity covers of a cartesian plane.
  */
 export class Extent implements Position, Size {
-
   /**
    * Derives a new extent based on repositioning a provided extent.
    *
@@ -47,12 +46,48 @@ export class Extent implements Position, Size {
     return new Extent(x, y, width, height);
   }
 
+  public readonly type: "Extent" = "Extent";
+
   constructor(
     readonly x: number,
     readonly y: number,
     readonly width: number,
     readonly height: number) {
 
+  }
+}
+
+/**
+ * Represents the extent an entity covers in terms of grid tiles.
+ */
+export class TileExtent {
+  /**
+   * Converts a TileExtent to an Extent.
+   *
+   * @param tileExtent A tile extent
+   * @param tileSize The size of the tiles
+   * @return the corresponding extent
+   */
+  public static toExtent(tileExtent: TileExtent, tileSize: number): Extent {
+    return new Extent(
+      tileExtent.column * tileSize,
+      tileExtent.row * tileSize,
+      tileExtent.columnSpan * tileSize,
+      tileExtent.rowSpan * tileSize);
+  }
+
+  public readonly type: "TileExtent" = "TileExtent";
+
+  constructor(
+    readonly column: number,
+    readonly row: number,
+    readonly columnSpan: number,
+    readonly rowSpan: number) {
+    if (columnSpan < 0) {
+      throw new Error("Column span canno tbe less than 0");
+    } else if (rowSpan < 0) {
+      throw new Error("Row span cannot be less than 0");
+    }
   }
 }
 
@@ -134,21 +169,45 @@ export default class ExtentCalculator {
    *
    * @param viewportExtent the extent of the grid viewport
    * @param forcedMinimumExtent the forced minimum extent of the grid
+   * @param tileSize the size of the grid tiles
    * @param itemExtents the individual extents of all the items located on the grid
    * @return the necessary extent of the grid
    */
   public static calculateGridExtent(
     viewportExtent: Extent,
     forcedMinimumExtent: Extent,
-    itemExtents: Extent[]): Extent {
+    tileSize: number,
+    itemExtents: Array<Extent | TileExtent>): Extent {
+
+    const normalizedItemExtents = ExtentCalculator.normalizeItemExtents(itemExtents, tileSize);
     const minimumExtentFromViewport = ExtentCalculator.deriveMinimumGridExtent(viewportExtent);
     const gridExtent = ExtentCalculator.reduceExtents([
       minimumExtentFromViewport,
       forcedMinimumExtent,
-      ...itemExtents,
+      ...normalizedItemExtents,
     ]);
 
     return gridExtent;
+  }
+
+  /**
+   * Normalizes the extents of items (which may be expressed in pixels or grid tiles).
+   *
+   * @param extents the collection of item extents
+   * @param tileSize the size of grid tiles
+   * @return the collection of item extents expressed in pixels
+   */
+  private static normalizeItemExtents(
+    extents: Array<Extent | TileExtent>,
+    tileSize: number): Extent[] {
+
+    return extents.map((extent) => {
+      switch (extent.type) {
+        case "Extent": return extent;
+        case "TileExtent": return TileExtent.toExtent(extent, tileSize);
+        default: throw new Error(`Invalid extent for item: ${extent}`);
+      }
+    });
   }
 
   /**

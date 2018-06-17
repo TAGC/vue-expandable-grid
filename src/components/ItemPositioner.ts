@@ -1,11 +1,12 @@
-import { Extent, ZERO_EXTENT } from "./ExtentCalculator";
+import { Extent, TileExtent, ZERO_EXTENT } from "./ExtentCalculator";
 import GridManager from "./GridManager";
 
 /**
  * Represents an item that can be placed on the grid.
  */
-export interface IGridItem extends Extent {
+export interface IGridItem {
   data: any;
+  extent: Extent | TileExtent;
 }
 
 /**
@@ -13,6 +14,7 @@ export interface IGridItem extends Extent {
  */
 export default class ItemPositioner extends GridManager<IGridItem> {
   private _gridExtent: Extent;
+  private _tileSize: number;
 
   constructor() {
     super();
@@ -27,6 +29,14 @@ export default class ItemPositioner extends GridManager<IGridItem> {
     return this._gridExtent;
   }
 
+  set tileSize(newTileSize: number) {
+    this._tileSize = newTileSize;
+  }
+
+  get tileSize(): number {
+    return this._tileSize;
+  }
+
   public canManage(object: any): object is IGridItem {
     return object.data && !object.data.isTile;
   }
@@ -35,11 +45,20 @@ export default class ItemPositioner extends GridManager<IGridItem> {
     const grid = this.gridExtent;
 
     // Positioning is done in *logical* (zoom-independent) grid coordinate space.
+    const extent = this.getItemExtent(item);
 
     return new Extent(
-      item.x - (grid.x < 0 ? grid.x : 0),
-      item.y - (grid.y < 0 ? grid.y : 0),
-      item.width,
-      item.height);
+      extent.x - (grid.x < 0 ? grid.x : 0),
+      extent.y - (grid.y < 0 ? grid.y : 0),
+      extent.width,
+      extent.height);
+  }
+
+  private getItemExtent(item: IGridItem): Extent {
+    switch (item.extent.type) {
+      case "Extent": return item.extent;
+      case "TileExtent": return TileExtent.toExtent(item.extent, this.tileSize);
+      default: throw new Error(`Unknown extent type for item: ${JSON.stringify(item)}`);
+    }
   }
 }

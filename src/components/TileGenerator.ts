@@ -37,6 +37,7 @@ export type TileRegeneratedHandler = (newTiles: ITile[], statistics: TileStatist
 export default class TileGenerator extends GridManager<ITile> {
   private _zoomLevel: number;
   private _gridExtent: Extent;
+  private _tileSize: number;
 
   /**
    * Creates a new instance of TileManager.
@@ -45,7 +46,6 @@ export default class TileGenerator extends GridManager<ITile> {
    * @param onTilesRegenerated the callback to invoke when tiles are regenerated
    */
   constructor(
-    readonly tileSize: number,
     readonly scaleTile: (tileSize: number) => number,
     readonly onTilesRegenerated: TileRegeneratedHandler,
   ) {
@@ -61,6 +61,15 @@ export default class TileGenerator extends GridManager<ITile> {
 
   get gridExtent(): Extent {
     return this._gridExtent;
+  }
+
+  set tileSize(newTileSize: number) {
+    this._tileSize = newTileSize;
+    this.regenerateTiles();
+  }
+
+  get tileSize(): number {
+    return this._tileSize;
   }
 
   private get columnOffset(): number {

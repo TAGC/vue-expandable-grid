@@ -6,12 +6,13 @@
       :minExtent="minExtent"  
       @grid-resized="onGridResized"
       @grid-clicked="onGridClicked"
+      @grid-zoomed="onGridZoomed"
       startCentered
     >
       <SolidTile slot="grid-tile" slot-scope="{data}" v-bind="data" color="white" />
       <!-- <DebugTile slot="grid-tile" slot-scope="{data}" v-bind="data" :debug="`${data.column},${data.row}`" :style="styleObject" /> -->
       <div slot="grid-item" slot-scope="{data}">
-        <Cell v-if="data.isCell" v-bind="data" :size="cellSize" :fadeRate="cellFadeRate" :state="data.state" :paused="paused"/>
+        <Cell v-if="data.isCell" v-bind="data" :size="cellSize * zoomLevel" :fadeRate="cellFadeRate" :state="data.state" :paused="paused"/>
         <slot v-else name="additional-item" :data="data" />
       </div>
     </ExpandableGrid>
@@ -27,6 +28,7 @@ import ExpandableGrid, {
   IGridResizeEventArgs,
   ITile,
   SolidTile,
+  TileExtent,
 } from "@/.";
 import { ZERO_EXTENT } from "@/components/ExtentCalculator";
 import { differenceWith, intersectionWith, isEqual } from "lodash";
@@ -41,6 +43,7 @@ export default class ConwayGrid extends Vue {
   private previousGeneration: ICellPosition[] = [];
   private currentGeneration: ICellPosition[] = [];
   private regenerationTimer: any = null;
+  private zoomLevel = 0;
 
   @Prop({ default: 100 })
   private cellSize: number;
@@ -97,16 +100,10 @@ export default class ConwayGrid extends Vue {
     return 0.001 * 0.5 * this.cellRegenerationRate;
   }
 
-  private displayCell(cellPosition: ICellPosition, state: CellState): IGridItem {
+  private displayCell({ column, row }: ICellPosition, state: CellState): IGridItem {
     return {
-      data: {
-        state,
-        isCell: true,
-      },
-      x: Math.floor(cellPosition.column * this.cellSize),
-      y: Math.floor(cellPosition.row * this.cellSize),
-      width: this.cellSize,
-      height: this.cellSize,
+      data: { state, isCell: true },
+      extent: new TileExtent(column, row, 1, 1),
     };
   }
 
@@ -136,6 +133,10 @@ export default class ConwayGrid extends Vue {
     if (this.conwayGrid !== null) {
       this.conwayGrid!.resize(e);
     }
+  }
+
+  private onGridZoomed(zoomLevel: number) {
+    this.zoomLevel = zoomLevel;
   }
 
   private onGridClicked({ row, column }: IGridClickEventArgs) {

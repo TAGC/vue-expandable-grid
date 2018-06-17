@@ -1,4 +1,9 @@
-import ExtentCalculator, { Extent, Position, ZERO_EXTENT } from "@/components/ExtentCalculator";
+import ExtentCalculator, {
+  Extent,
+  Position,
+  TileExtent,
+  ZERO_EXTENT,
+} from "@/components/ExtentCalculator";
 import { expect } from "chai";
 
 describe("ExtentCalculator", () => {
@@ -48,6 +53,7 @@ describe("ExtentCalculator", () => {
     const actualGridExtent = ExtentCalculator.calculateGridExtent(
       ZERO_EXTENT,
       forcedMinimumExtent,
+      0,
       []);
 
     expect(actualGridExtent.x).is.at.most(forcedMinimumExtent.x);
@@ -90,7 +96,7 @@ describe("ExtentCalculator", () => {
 
     testCases.forEach(({ position, viewport, grid }) => {
       it(position, () => {
-        const actualGridExtent = ExtentCalculator.calculateGridExtent(viewport, ZERO_EXTENT, []);
+        const actualGridExtent = ExtentCalculator.calculateGridExtent(viewport, ZERO_EXTENT, 0, []);
         expect(actualGridExtent).to.deep.equal(grid);
       });
     });
@@ -98,8 +104,9 @@ describe("ExtentCalculator", () => {
 
   describe("calculates the minimum grid extent when:", () => {
     const viewport = new Extent(20, 50, 100, 200);
+    const tileSize = 10;
 
-    type TestCase = { description: string, items: Extent[], grid: Extent };
+    type TestCase = { description: string, items: Array<Extent | TileExtent>, grid: Extent };
     const testCases: TestCase[] = [
       {
         description: "no items in grid",
@@ -129,11 +136,24 @@ describe("ExtentCalculator", () => {
         ],
         grid: new Extent(-50, -100, 220, 400),
       },
+      {
+        description: "two items in grid, expressed in units of tiles",
+        items: [
+          new TileExtent(-5, -10, 20, 10),
+          new TileExtent(15, 25, 2, 5),
+        ],
+        grid: new Extent(-50, -100, 220, 400),
+      },
     ];
 
     testCases.forEach(({ description, items, grid }) => {
       it(description, () => {
-        const actualGridExtent = ExtentCalculator.calculateGridExtent(viewport, ZERO_EXTENT, items);
+        const actualGridExtent = ExtentCalculator.calculateGridExtent(
+          viewport,
+          ZERO_EXTENT,
+          tileSize,
+          items);
+
         expect(actualGridExtent).to.deep.equal(grid);
       });
     });

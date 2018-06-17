@@ -14,7 +14,7 @@
 </template>
 
 <script lang="ts">
-import { Extent, IGridItem } from "@/.";
+import { Extent, IGridItem, TileExtent } from "@/.";
 import Vue from "vue";
 import { Component } from "vue-property-decorator";
 import { IntroCard, TileSizeCard } from "./cards";
@@ -33,14 +33,14 @@ export default class App extends Vue {
 
   private get cards(): IGridItem[] {
     return [
-      this.createCard("IntroCard", new Extent(-150, -150, 300, 300)),
-      this.createCard("TileSizeCard", new Extent(900, -150, 300, 300)),
+      this.createCard("IntroCard", new TileExtent(-3, -3, 6, 6)),
+      this.createCard("TileSizeCard", new TileExtent(18, -3, 6, 6)),
     ];
   }
 
-  private createCard(identifier: string, extent: Extent) {
+  private createCard(identifier: string, extent: TileExtent) {
     return {
-      ...extent,
+      extent,
       data: {
         component: identifier,
       },
