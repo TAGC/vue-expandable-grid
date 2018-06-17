@@ -1,12 +1,17 @@
 <template>
   <md-card class="md-elevation-20">
     <md-card-content>
-      <div class="card-content-layout">
+      <div class="card-content-layout" ref="cardContentLayout">
         <div v-if="nextCardDirection" :class="`card-pointer-${nextCardDirection}`" :style="cardPointerStyleObject">
           <md-icon>{{cardPointer}}</md-icon>
         </div>
-        <div class="card-body">
-          <slot />
+        <div v-if="displayBody" class="card-body" ref="cardBody">
+          <slot  />
+        </div>
+        <div v-else class="zoom-text">
+          <b>Zoom in to view card</b>
+          <br />
+          <small>Ctrl + wheel</small>
         </div>
       </div>
     </md-card-content>
@@ -14,6 +19,7 @@
 </template>
 
 <script lang="ts">
+import { delay } from "lodash";
 import Vue from "vue";
 import { Component, Prop } from "vue-property-decorator";
 import Control from "./Control.vue";
@@ -22,16 +28,40 @@ type NextCardDirection = "up" | "down" | "left" | "right";
 
 @Component({ components: { Control } })
 export default class Card extends Vue {
+  // Should be kept in sync with $pointer-section.
+  private static readonly pointerSectionSize = 50;
+
+  private displayBody = true;
+
   @Prop({ default: undefined })
   private nextCardDirection: NextCardDirection | undefined;
 
   @Prop({ required: true })
   private pointerAnimationDuration: number;
 
+  private mounted() {
+    const cardBody = this.$refs.cardBody as Element;
+    const cardContentLayout = this.$refs.cardContentLayout as Element;
+
+    const bodyHeight = cardBody.clientHeight;
+    const layoutHeight = cardContentLayout.clientHeight;
+    const tooTall = bodyHeight + Card.pointerSectionSize * 2 >= layoutHeight;
+
+    this.displayBody = !tooTall;
+  }
+
   private get cardPointerStyleObject() {
     return {
       "animation-duration": `${this.pointerAnimationDuration}s`,
     };
+  }
+
+  private get contentFitsCurrentSize(): boolean {
+    const cardBody = this.$refs.cardBody as Element;
+    const cardContentLayout = this.$refs.cardContentLayout as Element;
+
+    console.log({cardBody, cardContentLayout});
+    return false;
   }
 
   private get cardPointer(): string {
@@ -123,6 +153,15 @@ $neg-pointer-movement: calc(-#{$pointer-section} / 5);
     grid-column: 2;
     justify-self: start;
     align-self: start;
+    height: 100%;
+    width: 100%;
+  }
+
+  .zoom-text {
+    text-align: center;
+    align-self: center;
+    grid-column: 2;
+    grid-row: 2;
   }
 }
 
