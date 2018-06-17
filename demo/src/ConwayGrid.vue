@@ -6,6 +6,7 @@
       :minExtent="minExtent"  
       @grid-resized="onGridResized"
       @grid-clicked="onGridClicked"
+      startCentered
     >
       <SolidTile slot="grid-tile" slot-scope="{data}" v-bind="data" color="white" />
       <!-- <DebugTile slot="grid-tile" slot-scope="{data}" v-bind="data" :debug="`${data.column},${data.row}`" :style="styleObject" /> -->
@@ -61,7 +62,7 @@ export default class ConwayGrid extends Vue {
 
   public mounted() {
     this.conwayGrid = new ConwayCalculator(this.habitability, this.onCellsGenerated);
-    this.toggleRegeneration(this.paused);
+    // this.toggleRegeneration(this.paused);
   }
 
   private get styleObject() {
@@ -138,17 +139,17 @@ export default class ConwayGrid extends Vue {
   }
 
   private onGridClicked({ row, column }: IGridClickEventArgs) {
-    this.conwayGrid!.toggleCellAtPosition(row, column);
+    // this.conwayGrid!.toggleCellAtPosition(row, column);
 
-    // Skips the transitional states (born, dying) after adding/removing the cell.
-    if (this.conwayGrid!.isCellAlive(row, column)) {
-      this.currentGeneration.push({ row, column });
-      this.previousGeneration.push({ row, column });
-    } else {
-      const isNotToggledCell = (cell) => !isEqual(cell, { row, column });
-      this.currentGeneration = this.currentGeneration.filter(isNotToggledCell);
-      this.previousGeneration = this.previousGeneration.filter(isNotToggledCell);
-    }
+    // // Skips the transitional states (born, dying) after adding/removing the cell.
+    // if (this.conwayGrid!.isCellAlive(row, column)) {
+    //   this.currentGeneration.push({ row, column });
+    //   this.previousGeneration.push({ row, column });
+    // } else {
+    //   const isNotToggledCell = (cell) => !isEqual(cell, { row, column });
+    //   this.currentGeneration = this.currentGeneration.filter(isNotToggledCell);
+    //   this.previousGeneration = this.previousGeneration.filter(isNotToggledCell);
+    // }
   }
 
   private onCellsGenerated(cells: ICellPosition[]) {

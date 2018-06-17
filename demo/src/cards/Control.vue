@@ -61,6 +61,9 @@ export default class Control extends Vue {
 .md-field {
   display: inline-grid;
   width: auto;
+  padding: 0;
+  margin: 0;
+  min-height: 0;
 
   .md-input {
     font-size: $font-size;

@@ -1,7 +1,9 @@
 <template>
-  <Card>
+  <Card nextCardDirection="right">
     This demo showcases how vue-expandable-grid can be used to create an indefinitely-large Conway's Game of Life.
-    <br />
+    <p />
+    You can zoom and navigate around the grid using the mouse and trackpad. <b>Try navigating right.</b>
+    <p />
     Try setting the cell size to
     <Control
       v-model.number="cellSize"
