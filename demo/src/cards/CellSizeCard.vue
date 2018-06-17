@@ -1,5 +1,5 @@
 <template>
-  <Card nextCardDirection="up">
+  <Card nextCardDirection="up" :pointerAnimationDuration="pointerAnimationDuration">
     You can configure the size of the tiles and items on the grid.
     <p />
     Currently each cell in the grid is
@@ -26,6 +26,9 @@ import Control from "./Control.vue";
 @Component({ components: { Card, Control } })
 export default class CellSizeCard extends Vue {
   @Prop({ required: true })
+  private pointerAnimationDuration: number;
+
+  @Prop({ required: true })
   private cellSize: number;
 
   private get minCellSize() {
@@ -37,7 +40,9 @@ export default class CellSizeCard extends Vue {
   }
 
   private isValidCellSize(cellSize: number) {
-    return isNumber(cellSize) && cellSize >= this.minCellSize && cellSize <= this.maxCellSize;
+    return isNumber(cellSize)
+      && cellSize >= this.minCellSize
+      && cellSize <= this.maxCellSize;
   }
 }
 </script>

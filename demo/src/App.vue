@@ -4,7 +4,7 @@
       :minExtent="minGridExtent"
       :cellSize="cellSize"
       :cellRegenerationRate="cellRegenerationRate"
-      :habitability="habitability"
+      :habitability="habitability / 100"
       :paused="paused"
       :additionalItems="cards"
     >
@@ -12,9 +12,14 @@
         slot="additional-item"
         slot-scope="{data}"
         :is="data.component"
+        :pointerAnimationDuration="cellRegenerationRate / 1000"
+        :cellRegenerationRate="cellRegenerationRate"
         :cellSize="cellSize"
+        :habitability="habitability"
         @stable="paused = !$event"
         @cell-size="cellSize = $event"
+        @cell-regeneration-rate="cellRegenerationRate = $event"
+        @habitability="habitability = $event"
       />
     </ConwayGrid>
   </div>
@@ -24,14 +29,21 @@
 import { Extent, IGridItem, TileExtent } from "@/.";
 import Vue from "vue";
 import { Component } from "vue-property-decorator";
-import { CellSizeCard, IntroCard } from "./cards";
-import ConwayGrid from "./ConwayGrid.vue";
+import { CellRegenerationRateCard, CellSizeCard, HabitabilityCard, IntroCard } from "./cards";
+import { ConwayGrid } from "./grid";
 
-@Component({ components: { ConwayGrid, IntroCard, CellSizeCard } })
+const cards = {
+  CellRegenerationRateCard,
+  CellSizeCard,
+  HabitabilityCard,
+  IntroCard,
+};
+
+@Component({ components: { ConwayGrid, ...cards } })
 export default class App extends Vue {
-  private cellSize = 50;
   private cellRegenerationRate = 1000;
-  private habitability = 0.25;
+  private cellSize = 50;
+  private habitability = 25;
   private paused = false;
 
   private get minGridExtent(): Extent {
@@ -42,6 +54,8 @@ export default class App extends Vue {
     return [
       this.createCard("IntroCard", new TileExtent(-3, -3, 6, 6)),
       this.createCard("CellSizeCard", new TileExtent(18, -3, 6, 6)),
+      this.createCard("CellRegenerationRateCard", new TileExtent(18, -18, 6, 6)),
+      this.createCard("HabitabilityCard", new TileExtent(4, -17, 8, 4)),
     ];
   }
 

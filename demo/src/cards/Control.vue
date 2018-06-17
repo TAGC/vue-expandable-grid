@@ -6,20 +6,20 @@
       :value="value"
       :min="min"
       :max="max"
-      @input="onInput"
-      @focus="isFocused = true"
-      @blur="isFocused = false"
+      @input="debouncedOnInput"
+      @focus="isEditing = true"
     />
   </md-field>
 </template>
 
 <script lang="ts">
+import { debounce } from "lodash";
 import Vue from "vue";
 import { Component, Prop, Watch } from "vue-property-decorator";
 
 @Component
 export default class Control extends Vue {
-  private isFocused = false;
+  private isEditing = false;
 
   @Prop({ required: true })
   private width: number;
@@ -41,8 +41,10 @@ export default class Control extends Vue {
   }
 
   private get isStable() {
-    return this.isValid && !this.isFocused;
+    return this.isValid && !this.isEditing;
   }
+
+  private debouncedOnInput = debounce(this.onInput, 500);
 
   private onInput(value: string) {
     const number = parseInt(value, 10);
@@ -51,6 +53,8 @@ export default class Control extends Vue {
     if (this.validator(number)) {
       this.$emit("valid-input", number);
     }
+
+    this.isEditing = false;
   }
 
   @Watch("isStable")

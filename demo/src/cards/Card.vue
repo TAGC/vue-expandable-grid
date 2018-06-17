@@ -2,7 +2,7 @@
   <md-card class="md-elevation-20">
     <md-card-content>
       <div class="card-content-layout">
-        <div v-if="nextCardDirection" :class="`card-pointer-${nextCardDirection}`">
+        <div v-if="nextCardDirection" :class="`card-pointer-${nextCardDirection}`" :style="cardPointerStyleObject">
           <md-icon>{{cardPointer}}</md-icon>
         </div>
         <div class="card-body">
@@ -24,6 +24,15 @@ type NextCardDirection = "up" | "down" | "left" | "right";
 export default class Card extends Vue {
   @Prop({ default: undefined })
   private nextCardDirection: NextCardDirection | undefined;
+
+  @Prop({ required: true })
+  private pointerAnimationDuration: number;
+
+  private get cardPointerStyleObject() {
+    return {
+      "animation-duration": `${this.pointerAnimationDuration}s`,
+    };
+  }
 
   private get cardPointer(): string {
     switch (this.nextCardDirection) {
@@ -77,7 +86,6 @@ $neg-pointer-movement: calc(-#{$pointer-section} / 5);
     align-content: center;
     justify-content: center;
     animation-name: move-right;
-    animation-duration: 2s;
     animation-iteration-count: infinite;
     animation-timing-function: linear;
   }
