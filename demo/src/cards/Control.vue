@@ -6,7 +6,7 @@
       :value="value"
       :min="min"
       :max="max"
-      @input="$emit('input', $event)"
+      @input="onInput"
       @focus="isFocused = true"
       @blur="isFocused = false"
     />
@@ -42,6 +42,15 @@ export default class Control extends Vue {
 
   private get isStable() {
     return this.isValid && !this.isFocused;
+  }
+
+  private onInput(value: string) {
+    const number = parseInt(value, 10);
+    this.$emit("input", number);
+
+    if (this.validator(number)) {
+      this.$emit("valid-input", number);
+    }
   }
 
   @Watch("isStable")

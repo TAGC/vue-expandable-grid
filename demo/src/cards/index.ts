@@ -1,2 +1,2 @@
+export { default as CellSizeCard } from "./CellSizeCard.vue";
 export { default as IntroCard } from "./IntroCard.vue";
-export { default as TileSizeCard } from "./TileSizeCard.vue";

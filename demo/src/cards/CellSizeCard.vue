@@ -4,11 +4,12 @@
     <p />
     Currently each cell in the grid is
     <Control
-      v-model.number="cellSize"
+      :value="cellSize"
       :min="minCellSize"
       :max="maxCellSize"
       :validator="isValidCellSize"
       :width="40"
+      @valid-input="$emit('cell-size', $event)"
       @stable="$emit('stable', $event)"
     />
     pixels along each side.
@@ -18,13 +19,14 @@
 <script lang="ts">
 import { isNumber } from "lodash";
 import Vue from "vue";
-import { Component } from "vue-property-decorator";
+import { Component, Prop } from "vue-property-decorator";
 import Card from "./Card.vue";
 import Control from "./Control.vue";
 
 @Component({ components: { Card, Control } })
-export default class TileSizeCard extends Vue {
-  private cellSize = 50;
+export default class CellSizeCard extends Vue {
+  @Prop({ required: true })
+  private cellSize: number;
 
   private get minCellSize() {
     return 45;
