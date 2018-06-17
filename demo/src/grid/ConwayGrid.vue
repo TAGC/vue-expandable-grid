@@ -39,7 +39,9 @@ import ConwayCalculator, { GridDimensions, ICell, ICellPosition } from "./Conway
 
 @Component({ components: { ExpandableGrid, Cell, DebugTile, SolidTile } })
 export default class ConwayGrid extends Vue {
-  private conwayGrid: ConwayCalculator | null = null;
+  private static readonly LIVE_CELL_ID = "live cell";
+
+  private calculator: ConwayCalculator | null = null;
   private previousGeneration: ICellPosition[] = [];
   private currentGeneration: ICellPosition[] = [];
   private regenerationTimer: any = null;
@@ -64,7 +66,8 @@ export default class ConwayGrid extends Vue {
   private additionalItems: IGridItem[];
 
   public mounted() {
-    this.conwayGrid = new ConwayCalculator(this.habitability, this.onCellsGenerated);
+    this.calculator = new ConwayCalculator(this.onCellsGenerated);
+    this.onHabitabilityChanged(this.habitability);
     this.toggleRegeneration(this.paused);
   }
 
@@ -102,7 +105,7 @@ export default class ConwayGrid extends Vue {
 
   private displayCell({ column, row }: ICellPosition, state: CellState): IGridItem {
     return {
-      id: "live cell",
+      id: ConwayGrid.LIVE_CELL_ID,
       data: { state, isCell: true },
       extent: new TileExtent(column, row, 1, 1),
     };
@@ -110,7 +113,7 @@ export default class ConwayGrid extends Vue {
 
   private regenerateCells() {
     console.time("Next generation");
-    this.conwayGrid!.nextGeneration();
+    this.calculator!.nextGeneration();
     console.timeEnd("Next generation");
   }
 
@@ -124,6 +127,11 @@ export default class ConwayGrid extends Vue {
     }
   }
 
+  @Watch("habitability")
+  private onHabitabilityChanged(habitability: number) {
+    this.calculator!.habitability = habitability;
+  }
+
   @Watch("cellRegenerationRate")
   private onCellRegenerationRateChanged() {
     this.toggleRegeneration(!this.paused);
@@ -131,8 +139,8 @@ export default class ConwayGrid extends Vue {
   }
 
   private onGridResized(e: IGridResizeEventArgs) {
-    if (this.conwayGrid !== null) {
-      this.conwayGrid!.resize(e);
+    if (this.calculator !== null) {
+      this.calculator!.resize(e);
     }
   }
 
@@ -142,16 +150,20 @@ export default class ConwayGrid extends Vue {
 
   private onGridClicked({ row, column, itemId }: IGridClickEventArgs) {
     switch (itemId) {
-      case "live cell":
+      case ConwayGrid.LIVE_CELL_ID:
         const isNotToggledCell = (cell) => !isEqual(cell, { row, column });
-        this.conwayGrid!.toggleCellAtPosition(row, column);
+        this.calculator!.toggleCellAtPosition(row, column);
         this.currentGeneration = this.currentGeneration.filter(isNotToggledCell);
         this.previousGeneration = this.previousGeneration.filter(isNotToggledCell);
+        this.$emit("toggled-cell");
+        break;
 
       case undefined:
-        this.conwayGrid!.toggleCellAtPosition(row, column);
+        this.calculator!.toggleCellAtPosition(row, column);
         this.currentGeneration.push({ row, column });
         this.previousGeneration.push({ row, column });
+        this.$emit("toggled-cell");
+        break;
     }
   }
 

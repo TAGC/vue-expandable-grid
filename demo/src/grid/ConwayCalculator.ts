@@ -22,11 +22,13 @@ export class GridDimensions {
 export type CellGenerationHandler = (liveCells: ICellPosition[]) => void;
 
 export default class ConwayCalculator {
+  public habitability: number;
+
   private firstRow: number;
   private firstColumn: number;
   private grid: boolean[][];
 
-  constructor(readonly habitability: number, readonly onCellsGenerated: CellGenerationHandler) {
+  constructor(readonly onCellsGenerated: CellGenerationHandler) {
     this.firstRow = 0;
     this.firstColumn = 0;
     this.grid = [];
