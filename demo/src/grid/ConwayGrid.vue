@@ -12,7 +12,7 @@
       <SolidTile slot="grid-tile" slot-scope="{data}" v-bind="data" color="white" />
       <!-- <DebugTile slot="grid-tile" slot-scope="{data}" v-bind="data" :debug="`${data.column},${data.row}`" :style="styleObject" /> -->
       <div slot="grid-item" slot-scope="{data}">
-        <Cell v-if="data.isCell" v-bind="data" :size="cellSize * zoomLevel" :fadeRate="cellFadeRate" :state="data.state" :paused="paused"/>
+        <Cell v-if="data.isCell" v-bind="data" :disabled="paused"/>
         <slot v-else name="additional-item" :data="data" />
       </div>
     </ExpandableGrid>
@@ -34,15 +34,33 @@ import { ZERO_EXTENT } from "@/components/ExtentCalculator";
 import { differenceWith, intersectionWith, isEqual } from "lodash";
 import Vue from "vue";
 import { Component, Prop, Watch } from "vue-property-decorator";
-import Cell, { State as CellState } from "./Cell.vue";
+import Cell from "./Cell.vue";
 import ConwayCalculator, { GridDimensions, ICell, ICellPosition } from "./ConwayCalculator";
 
 @Component({ components: { ExpandableGrid, Cell, DebugTile, SolidTile } })
 export default class ConwayGrid extends Vue {
   private static readonly LIVE_CELL_ID = "live cell";
+  private static readonly HUE_OFFSET = Math.random() * 360;
+  private static readonly HUE_SCALE = 0.5;
+
+  private static displayCell(cellPosition: ICellPosition): IGridItem {
+    const color = ConwayGrid.mapPositionToColor(cellPosition);
+
+    return {
+      id: ConwayGrid.LIVE_CELL_ID,
+      data: { color, isCell: true },
+      extent: new TileExtent(cellPosition.column, cellPosition.row, 1, 1),
+    };
+  }
+
+  private static mapPositionToColor({ column, row }: ICellPosition): string {
+    const hue = ((row + column) * ConwayGrid.HUE_SCALE + ConwayGrid.HUE_OFFSET) % 360;
+    const saturation = 100;
+    const lightness = 75;
+    return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+  }
 
   private calculator: ConwayCalculator | null = null;
-  private previousGeneration: ICellPosition[] = [];
   private currentGeneration: ICellPosition[] = [];
   private regenerationTimer: any = null;
   private zoomLevel = 0;
@@ -77,38 +95,8 @@ export default class ConwayGrid extends Vue {
     };
   }
 
-  private get bornCells(): IGridItem[] {
-    const cells = differenceWith(this.currentGeneration, this.previousGeneration, isEqual);
-
-    return cells.map((cell) => this.displayCell(cell, "born"));
-  }
-
-  private get stableCells(): IGridItem[] {
-    const cells = intersectionWith(this.currentGeneration, this.previousGeneration, isEqual);
-
-    return cells.map((cell) => this.displayCell(cell, "stable"));
-  }
-
-  private get dyingCells(): IGridItem[] {
-    const cells = differenceWith(this.previousGeneration, this.currentGeneration, isEqual);
-
-    return cells.map((cell) => this.displayCell(cell, "dying"));
-  }
-
   private get cells(): IGridItem[] {
-    return [...this.bornCells, ...this.stableCells, ...this.dyingCells];
-  }
-
-  private get cellFadeRate(): number {
-    return 0.001 * 0.5 * this.cellRegenerationRate;
-  }
-
-  private displayCell({ column, row }: ICellPosition, state: CellState): IGridItem {
-    return {
-      id: ConwayGrid.LIVE_CELL_ID,
-      data: { state, isCell: true },
-      extent: new TileExtent(column, row, 1, 1),
-    };
+    return this.currentGeneration.map(ConwayGrid.displayCell);
   }
 
   private regenerateCells() {
@@ -154,21 +142,18 @@ export default class ConwayGrid extends Vue {
         const isNotToggledCell = (cell) => !isEqual(cell, { row, column });
         this.calculator!.toggleCellAtPosition(row, column);
         this.currentGeneration = this.currentGeneration.filter(isNotToggledCell);
-        this.previousGeneration = this.previousGeneration.filter(isNotToggledCell);
         this.$emit("toggled-cell");
         break;
 
       case undefined:
         this.calculator!.toggleCellAtPosition(row, column);
         this.currentGeneration.push({ row, column });
-        this.previousGeneration.push({ row, column });
         this.$emit("toggled-cell");
         break;
     }
   }
 
   private onCellsGenerated(cells: ICellPosition[]) {
-    this.previousGeneration = [...this.currentGeneration];
     this.currentGeneration = cells;
   }
 }
