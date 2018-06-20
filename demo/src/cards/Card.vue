@@ -24,7 +24,7 @@ import Vue from "vue";
 import { Component, Prop } from "vue-property-decorator";
 import Control from "./Control.vue";
 
-type NextCardDirection = "up" | "down" | "left" | "right";
+export type NextCardDirection = "up" | "down" | "left" | "right";
 
 @Component({ components: { Control } })
 export default class Card extends Vue {

@@ -1,5 +1,5 @@
 <template>
-  <Card nextCardDirection="up" :pointerAnimationDuration="pointerAnimationDuration">
+  <Card v-bind="$props">
     New live cells will spawn as the grid expands. Each cell has a
     <Control
       :value="habitability"
@@ -18,11 +18,14 @@
 import { isNumber } from "lodash";
 import Vue from "vue";
 import { Component, Prop } from "vue-property-decorator";
-import Card from "./Card.vue";
+import Card, { NextCardDirection } from "./Card.vue";
 import Control from "./Control.vue";
 
 @Component({ components: { Card, Control } })
 export default class HabitabilityCard extends Vue {
+  @Prop({ required: true })
+  private nextCardDirection: NextCardDirection;
+
   @Prop({ required: true })
   private pointerAnimationDuration: number;
 

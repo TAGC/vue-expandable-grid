@@ -13,6 +13,7 @@
         slot="additional-item"
         slot-scope="{data}"
         :is="data.component"
+        :nextCardDirection="data.nextCardDirection"
         :pointerAnimationDuration="cellRegenerationRate / 1000"
         :cellRegenerationRate="cellRegenerationRate"
         :cellSize="cellSize"
@@ -37,6 +38,7 @@ import {
   GridEventsCard,
   HabitabilityCard,
   IntroCard,
+  NextCardDirection,
 } from "./cards";
 import { ConwayGrid } from "./grid";
 
@@ -50,11 +52,11 @@ const cards = {
 
 @Component({ components: { ConwayGrid, ...cards } })
 export default class App extends Vue {
-  private static createCard(id: string, extent: TileExtent) {
-    return { id, extent, data: { component: id } };
+  private static createCard(id: string, extent: TileExtent, nextCardDirection: NextCardDirection) {
+    return { id, extent, data: { component: id, nextCardDirection } };
   }
 
-  private cellRegenerationRate = 1000;
+  private cellRegenerationRate = 2000;
   private cellSize = 50;
   private habitability = 25;
   private paused = false;
@@ -66,11 +68,11 @@ export default class App extends Vue {
 
   private get cards(): IGridItem[] {
     return [
-      App.createCard("IntroCard", new TileExtent(-3, -3, 6, 6)),
-      App.createCard("CellSizeCard", new TileExtent(18, -3, 6, 6)),
-      App.createCard("CellRegenerationRateCard", new TileExtent(18, -18, 6, 6)),
-      App.createCard("HabitabilityCard", new TileExtent(4, -17, 8, 4)),
-      App.createCard("GridEventsCard", new TileExtent(4, -30, 8, 6)),
+      App.createCard("IntroCard", new TileExtent(-3, -3, 6, 6), "right"),
+      App.createCard("CellSizeCard", new TileExtent(18, -3, 6, 6), "up"),
+      App.createCard("CellRegenerationRateCard", new TileExtent(18, -18, 6, 6), "left"),
+      App.createCard("HabitabilityCard", new TileExtent(4, -17, 8, 4), "up"),
+      App.createCard("GridEventsCard", new TileExtent(4, -30, 8, 6), "up"),
     ];
   }
 

@@ -1,5 +1,5 @@
 <template>
-  <Card nextCardDirection="up" :pointerAnimationDuration="pointerAnimationDuration">
+  <Card v-bind="$props">
     Events will be generated as you interact with the grid. This makes it possible to write
     Vue components that wrap ExpandableGrid and perform specific actions when this happens.
     <p />
@@ -11,10 +11,13 @@
 <script lang="ts">
 import Vue from "vue";
 import { Component, Prop } from "vue-property-decorator";
-import Card from "./Card.vue";
+import Card, { NextCardDirection } from "./Card.vue";
 
 @Component({ components: { Card } })
 export default class GridEventsCard extends Vue {
+  @Prop({ required: true })
+  private nextCardDirection: NextCardDirection;
+
   @Prop({ required: true })
   private pointerAnimationDuration: number;
 }
