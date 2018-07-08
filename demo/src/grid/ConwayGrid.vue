@@ -31,7 +31,6 @@ import ExpandableGrid, {
   TileExtent,
 } from "@/.";
 import { ZERO_EXTENT } from "@/components/ExtentCalculator";
-import { differenceWith, intersectionWith, isEqual } from "lodash";
 import Vue from "vue";
 import { Component, Prop, Watch } from "vue-property-decorator";
 import Cell from "./Cell.vue";
@@ -84,7 +83,7 @@ export default class ConwayGrid extends Vue {
   private additionalItems: IGridItem[];
 
   public mounted() {
-    this.calculator = new ConwayCalculator(this.onCellsGenerated);
+    this.calculator = new ConwayCalculator(this.onCellsGenerated, this.deadZones);
     this.onHabitabilityChanged(this.habitability);
     this.toggleRegeneration(this.paused);
   }
@@ -97,6 +96,23 @@ export default class ConwayGrid extends Vue {
 
   private get cells(): IGridItem[] {
     return this.currentGeneration.map(ConwayGrid.displayCell);
+  }
+
+  private get deadZones(): GridDimensions[] {
+    const deadZones: GridDimensions[] = [];
+
+    for (const { extent } of this.additionalItems) {
+      if (extent.type === "TileExtent") {
+        deadZones.push({
+          firstColumn: extent.column,
+          firstRow: extent.row,
+          lastColumn: extent.column + extent.columnSpan,
+          lastRow: extent.row + extent.rowSpan,
+        });
+      }
+    }
+
+    return deadZones;
   }
 
   private regenerateCells() {
@@ -139,14 +155,14 @@ export default class ConwayGrid extends Vue {
   private onGridClicked({ row, column, itemId }: IGridClickEventArgs) {
     switch (itemId) {
       case ConwayGrid.LIVE_CELL_ID:
-        const isNotToggledCell = (cell) => !isEqual(cell, { row, column });
-        this.calculator!.toggleCellAtPosition(row, column);
+        const isNotToggledCell = (cell) => cell.row !== row || cell.column !== column;
+        this.calculator!.toggleCellAtPosition({ row, column });
         this.currentGeneration = this.currentGeneration.filter(isNotToggledCell);
         this.$emit("toggled-cell");
         break;
 
       case undefined:
-        this.calculator!.toggleCellAtPosition(row, column);
+        this.calculator!.toggleCellAtPosition({ row, column });
         this.currentGeneration.push({ row, column });
         this.$emit("toggled-cell");
         break;

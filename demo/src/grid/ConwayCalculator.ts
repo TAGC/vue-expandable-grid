@@ -1,13 +1,26 @@
 import { filter, sumBy } from "lodash";
 
-export interface ICellPosition {
+interface ILogicalCellPosition {
   readonly row: number;
   readonly column: number;
 }
 
-export interface ICell extends ICellPosition {
+interface IPhysicalCellPosition {
+  readonly iRow: number;
+  readonly iColumn: number;
+}
+
+interface ILogicalCell extends ILogicalCellPosition {
   readonly isAlive: boolean;
 }
+
+interface IPhysicalCell extends IPhysicalCellPosition {
+  readonly isAlive: boolean;
+}
+
+export type ICellPosition = ILogicalCellPosition;
+export type ICell = ILogicalCell;
+export type CellGenerationHandler = (liveCells: ILogicalCellPosition[]) => void;
 
 export class GridDimensions {
   constructor(
@@ -19,20 +32,35 @@ export class GridDimensions {
   }
 }
 
-export type CellGenerationHandler = (liveCells: ICellPosition[]) => void;
-
 export default class ConwayCalculator {
   public habitability: number;
 
+  private readonly deadPositions: ILogicalCellPosition[];
   private firstRow: number;
   private firstColumn: number;
   private grid: boolean[][];
 
-  constructor(readonly onCellsGenerated: CellGenerationHandler) {
+  constructor(
+    readonly onCellsGenerated: CellGenerationHandler,
+    deadZones: GridDimensions[] = []) {
     this.firstRow = 0;
     this.firstColumn = 0;
     this.grid = [];
+    this.deadPositions = [];
 
+    for (const deadZone of deadZones) {
+      for (let row = deadZone.firstRow; row < deadZone.lastRow; row++) {
+        for (let column = deadZone.firstColumn; column < deadZone.lastColumn; column++) {
+          const position = { row, column };
+
+          if (!this.isCellPositionInDeadZone(position)) {
+            this.deadPositions.push(position);
+          }
+        }
+      }
+    }
+
+    Object.freeze(this.deadPositions);
     this.resize(new GridDimensions(0, 0, 0, 0));
   }
 
@@ -52,21 +80,20 @@ export default class ConwayCalculator {
     return this.firstColumn + this.numberOfColumns;
   }
 
-  public toggleCellAtPosition(row: number, column: number) {
-    const { row: iRow, column: iColumn } = this.fromLogicalRowAndColumn(row, column);
+  public toggleCellAtPosition(position: ILogicalCellPosition) {
+    const { iRow, iColumn } = this.fromLogicalPosition(position);
 
-    if (iRow < 0 || iRow >= this.numberOfRows || iColumn < 0 || iColumn >= this.numberOfColumns) {
+    if (!this.positionIsInGrid({ iRow, iColumn })) {
       return;
     }
 
     this.grid[iRow][iColumn] = !this.grid[iRow][iColumn];
-    // this.publishCells([...this.getLiveCells()]);
   }
 
-  public isCellAlive(row: number, column: number): boolean {
-    const { row: iRow, column: iColumn } = this.fromLogicalRowAndColumn(row, column);
+  public isCellAlive(position: ILogicalCellPosition): boolean {
+    const { iRow, iColumn } = this.fromLogicalPosition(position);
 
-    if (iRow < 0 || iRow >= this.numberOfRows || iColumn < 0 || iColumn >= this.numberOfColumns) {
+    if (!this.positionIsInGrid({ iRow, iColumn })) {
       return false;
     }
 
@@ -123,12 +150,13 @@ export default class ConwayCalculator {
 
     this.firstRow = newDimensions.firstRow;
     this.firstColumn = newDimensions.firstColumn;
+    this.killCellsInDeadZones();
   }
 
   public nextGeneration() {
-    const dyingCells: ICellPosition[] = [];
-    const revivingCells: ICellPosition[] = [];
-    const nextGeneration: ICellPosition[] = [];
+    const dyingCells: IPhysicalCellPosition[] = [];
+    const revivingCells: IPhysicalCellPosition[] = [];
+    const nextGeneration: IPhysicalCellPosition[] = [];
     const visitedDeadCells = new Set<number>();
 
     for (const cell of this.getLiveCells()) {
@@ -168,56 +196,63 @@ export default class ConwayCalculator {
     this.publishCells(nextGeneration);
   }
 
-  private publishCells(cells: ICellPosition[]) {
-    const transform = (cell) => this.toLogicalRowAndColumn(cell.row, cell.column);
+  private publishCells(cells: IPhysicalCellPosition[]) {
+    const transformCoordinates = (cell) => this.toLogicalPosition(cell);
 
-    this.onCellsGenerated(cells.map(transform));
+    this.onCellsGenerated(cells.map(transformCoordinates));
   }
 
   private trySpawnCell() {
     return Math.random() < this.habitability;
   }
 
-  private positionHashOfCell(cell: ICellPosition): number {
-    return cell.row * this.numberOfRows + cell.column;
+  private positionHashOfCell(cell: IPhysicalCellPosition): number {
+    return cell.iRow * this.numberOfRows + cell.iColumn;
   }
 
-  private fromLogicalRowAndColumn(row: number, column: number): { row: number, column: number } {
+  private fromLogicalPosition({ row, column }: ILogicalCellPosition): IPhysicalCellPosition {
+    const iRow = row - this.firstRow;
+    const iColumn = column - this.firstColumn;
+
+    return { iRow, iColumn };
+  }
+
+  private positionIsInGrid({ iRow, iColumn }: IPhysicalCellPosition): boolean {
+    const validRow = 0 <= iRow && iRow < this.numberOfRows;
+    const validColumn =  0 <= iColumn && iColumn < this.numberOfColumns;
+    return validRow && validColumn;
+  }
+
+  private toLogicalPosition({ iRow, iColumn }: IPhysicalCellPosition): ILogicalCellPosition {
     return {
-      row: row - this.firstRow,
-      column: column - this.firstColumn,
+      row: iRow + this.firstRow,
+      column: iColumn + this.firstColumn,
     };
   }
 
-  private toLogicalRowAndColumn(row: number, column: number): { row: number, column: number } {
-    return {
-      row: row + this.firstRow,
-      column: column + this.firstColumn,
-    };
+  private killCell({ iRow, iColumn }: IPhysicalCellPosition) {
+    this.grid[iRow][iColumn] = false;
   }
 
-  private killCell({ row, column }: ICellPosition) {
-    this.grid[row][column] = false;
+  private reviveCell({ iRow, iColumn }: IPhysicalCellPosition) {
+    this.grid[iRow][iColumn] = true;
   }
 
-  private reviveCell({ row, column }: ICellPosition) {
-    this.grid[row][column] = true;
-  }
-
-  private *getLiveCells(): IterableIterator<ICell> {
-    for (let row = 0; row < this.numberOfRows; row++) {
-      for (let column = 0; column < this.numberOfColumns; column++) {
-        if (this.grid[row][column]) {
-          yield { row, column, isAlive: true };
+  private *getLiveCells(): IterableIterator<IPhysicalCell> {
+    for (let iRow = 0; iRow < this.numberOfRows; iRow++) {
+      for (let iColumn = 0; iColumn < this.numberOfColumns; iColumn++) {
+        if (this.grid[iRow][iColumn]) {
+          yield { iRow, iColumn, isAlive: true };
         }
       }
     }
   }
 
-  private *getNeighbours({ row, column }: ICellPosition): IterableIterator<ICell> {
-    for (let i = row - 1; i <= row + 1; i++) {
-      for (let j = column - 1; j <= column + 1; j++) {
-        if (i === row && j === column) {
+  private *getNeighbours({ iRow, iColumn }: IPhysicalCellPosition):
+    IterableIterator<IPhysicalCell> {
+    for (let i = iRow - 1; i <= iRow + 1; i++) {
+      for (let j = iColumn - 1; j <= iColumn + 1; j++) {
+        if (i === iRow && j === iColumn) {
           continue;
         }
 
@@ -225,23 +260,46 @@ export default class ConwayCalculator {
           continue;
         }
 
-        yield { row: i, column: j, isAlive: this.grid[i][j] };
+        yield { iRow: i, iColumn: j, isAlive: this.grid[i][j] };
       }
     }
   }
 
-  private countLiveNeighbours(cell: ICell): number {
+  private countLiveNeighbours(cell: IPhysicalCell): number {
     const neighbours = [...this.getNeighbours(cell)];
     return sumBy(neighbours, (it) => it.isAlive ? 1 : 0);
   }
 
-  private shouldCellBeAlive(cell: ICell): boolean {
+  private shouldCellBeAlive(cell: IPhysicalCell): boolean {
     const liveNeighbours = this.countLiveNeighbours(cell);
+    const logicalPosition = this.toLogicalPosition(cell);
 
-    if (cell.isAlive) {
+    if (this.isCellPositionInDeadZone(logicalPosition)) {
+      return false;
+    } else if (cell.isAlive) {
       return liveNeighbours === 2 || liveNeighbours === 3;
     } else {
       return liveNeighbours === 3;
     }
+  }
+
+  private killCellsInDeadZones() {
+    for (const position of this.deadPositions) {
+      const physicalPosition = this.fromLogicalPosition(position);
+
+      if (this.positionIsInGrid(physicalPosition)) {
+        this.killCell(physicalPosition);
+      }
+    }
+  }
+
+  private isCellPositionInDeadZone({ column, row }: ILogicalCellPosition): boolean {
+    for (const { row: deadRow, column: deadColumn } of this.deadPositions) {
+      if (row === deadRow && column === deadColumn) {
+        return true;
+      }
+    }
+
+    return false;
   }
 }
