@@ -3,4 +3,5 @@ export { default as CellSizeCard } from "./CellSizeCard.vue";
 export { default as GridEventsCard } from "./GridEventsCard.vue";
 export { default as HabitabilityCard } from "./HabitabilityCard.vue";
 export { default as IntroCard } from "./IntroCard.vue";
+export { default as PerformanceCard } from "./PerformanceCard.vue";
 export  * from "./Card.vue";

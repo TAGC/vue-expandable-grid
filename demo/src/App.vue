@@ -39,6 +39,7 @@ import {
   HabitabilityCard,
   IntroCard,
   NextCardDirection,
+  PerformanceCard,
 } from "./cards";
 import { ConwayGrid } from "./grid";
 
@@ -48,11 +49,15 @@ const cards = {
   GridEventsCard,
   HabitabilityCard,
   IntroCard,
+  PerformanceCard,
 };
 
 @Component({ components: { ConwayGrid, ...cards } })
 export default class App extends Vue {
-  private static createCard(id: string, extent: TileExtent, nextCardDirection: NextCardDirection) {
+  private static createCard(
+    id: string,
+    extent: TileExtent,
+    nextCardDirection: NextCardDirection | null) {
     return { id, extent, data: { component: id, nextCardDirection } };
   }
 
@@ -73,6 +78,7 @@ export default class App extends Vue {
       App.createCard("CellRegenerationRateCard", new TileExtent(18, -18, 6, 6), "left"),
       App.createCard("HabitabilityCard", new TileExtent(4, -17, 8, 4), "up"),
       App.createCard("GridEventsCard", new TileExtent(4, -30, 8, 6), "up"),
+      App.createCard("PerformanceCard", new TileExtent(3, -45, 10, 7), null),
     ];
   }
 
