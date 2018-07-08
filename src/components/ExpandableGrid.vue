@@ -3,7 +3,7 @@
     <VirtualCollection
       ref="collection"
       :cellSizeAndPositionGetter="cellSizeAndPositionGetter"
-      :collection="[...tiles, ...items]"
+      :collection="collectionGroups"
       :height="collectionSize.height"
       :width="collectionSize.width"
     >
@@ -41,6 +41,8 @@ import TileGenerator, { ITile, TileStatistics } from "./TileGenerator";
 import { DebugTile } from "./tiles";
 import ZoomManager from "./ZoomManager";
 
+type Group = { group: any[] };
+
 // Plugin installation is idempotent.
 Vue.use(VueResize);
 Vue.use(VirtualCollection);
@@ -61,11 +63,19 @@ export default class ExpandableGrid extends Vue {
    */
   private static readonly clickTimeout = 200;
 
+  private static readonly tileGroupIndex = 0;
+  private static readonly itemGroupIndex = 1;
+
   private collection: Element;
   private tileGenerator: TileGenerator;
   private itemPositioner: ItemPositioner;
   private scrollManager: ScrollManager;
   private zoomManager: ZoomManager;
+
+  /**
+   * Holds the two groups of objects in the collection: tiles and grid items
+   */
+  private collectionGroups: Group[] = [ { group: [] }, { group: [] } ];
 
   /**
    * The dimensions of the virtual-collection Vue component in *physical* grid coordinate space.
@@ -198,17 +208,20 @@ export default class ExpandableGrid extends Vue {
       this.items.map((item) => item.extent));
   }
 
-  private cellSizeAndPositionGetter(object: IGridItem | ITile): Extent {
+  private cellSizeAndPositionGetter(object: IGridItem | ITile, _, groupIndex: number): Extent {
     let logicalExtent: Extent;
 
-    if (!this.tileGenerator || !this.itemPositioner) {
-      return ZERO_EXTENT;
-    } else if (this.tileGenerator.canManage(object)) {
-      logicalExtent = this.tileGenerator.position(object);
-    } else if (this.itemPositioner.canManage(object)) {
-      logicalExtent = this.itemPositioner.position(object);
-    } else {
-      throw new Error(`Not a grid item or tile: ${JSON.stringify(object)}`);
+    switch (groupIndex) {
+      case ExpandableGrid.tileGroupIndex:
+        logicalExtent = this.tileGenerator.position(object as ITile);
+        break;
+
+      case ExpandableGrid.itemGroupIndex:
+        logicalExtent = this.itemPositioner.position(object as IGridItem);
+        break;
+
+      default:
+        throw new Error(`Not a grid item or tile: ${JSON.stringify(object)}`);
     }
 
     // The logical extent needs to be transformed into physical grid coordinate space so that it's
@@ -336,6 +349,18 @@ export default class ExpandableGrid extends Vue {
       this.physicalViewportExtent,
       this.collectionSize.width - scrollbarWidth,
       this.collectionSize.height - scrollbarHeight);
+  }
+
+  @Watch("tiles")
+  private onTilesChanged(tiles: ITile[]) {
+    console.log("Tiles changed");
+    this.collectionGroups[ExpandableGrid.tileGroupIndex].group = tiles;
+  }
+
+  @Watch("items")
+  private onItemsChanged(items: IGridItem[]) {
+    console.log("Items changed");
+    this.collectionGroups[ExpandableGrid.itemGroupIndex].group = items;
   }
 
   @Watch("tileSize")
