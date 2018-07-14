@@ -88,6 +88,10 @@ export default class ConwayGrid extends Vue {
     this.toggleRegeneration(this.paused);
   }
 
+  public beforeDestroy() {
+    this.toggleRegeneration(true);
+  }
+
   private get styleObject() {
     return {
       opacity: this.paused ? 0.5 : 1,
